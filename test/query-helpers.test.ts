@@ -2,9 +2,9 @@
 
 import { test } from 'tap'
 /* eslint-disable no-unused-vars */
-import * as t from '../lib/types'
+import * as t from '../src/types'
 /* eslint-enable no-unused-vars */
-import { Q } from '../lib'
+import { Q } from '../src'
 
 test('Q is a function that creates the final query object', t => {
   t.type(Q, 'function')
