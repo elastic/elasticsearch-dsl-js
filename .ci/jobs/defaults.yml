@@ -26,7 +26,7 @@
         reference-repo: /var/lib/jenkins/.git-references/elasticsearch-dsl-js.git
         branches:
         - ${branch_specifier}
-        url: https://github.com/elastic/elasticsearch-dsl-js.git
+        url: git@github.com:elastic/elasticsearch-dsl-js.git
         wipe-workspace: 'True'
     triggers:
     - github
