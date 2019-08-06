@@ -50,5 +50,8 @@
     "ignore": [
       "lib"
     ]
+  },
+  "dependencies": {
+    "deepmerge": "^4.0.0"
   }
 }
