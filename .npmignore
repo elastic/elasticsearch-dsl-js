@@ -68,3 +68,5 @@ test
 
 # examples folder
 examples
+
+.DS_Store
