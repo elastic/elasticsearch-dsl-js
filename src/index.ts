@@ -14,14 +14,14 @@ interface ElasticityOptions {
   client: any
 }
 
-function build (opts: ElasticityOptions) {
+function helper (opts: ElasticityOptions) {
   const { client } = opts
 
   return {
     search,
     scrollSearch,
     scrollDocuments,
-    bulkHelper
+    bulk
   }
 
   function getHits (body: any): any[] {
@@ -37,6 +37,7 @@ function build (opts: ElasticityOptions) {
     return response
   }
 
+  // TODO: study scroll search slices
   async function * scrollSearch (params: any, options?: any) {
     let response = await client.search(params, options)
     let scrollId = response.body._scroll_id
@@ -76,15 +77,22 @@ function build (opts: ElasticityOptions) {
     }
   }
 
-  function bulkHelper (opts) {
+  function bulk (opts) {
     const datasource = opts.datasource
     const bulkSize = opts.bulkSize || 1000
     const retries = opts.retries || 2
     const wait = opts.wait || 5000
+    // concurrent = 1
     let onDropFn = onDropNoop
     let shouldAbort = false
 
-    const failed: any[] = []
+    const stats = {
+      total: 0,
+      failed: 0,
+      successful: 0,
+      time: 0,
+      aborted: false
+    }
 
     return {
       onDrop,
@@ -97,6 +105,8 @@ function build (opts: ElasticityOptions) {
 
     function abort () {
       shouldAbort = true
+      stats.aborted = true
+      return this
     }
 
     function onDrop (fn) {
@@ -106,12 +116,14 @@ function build (opts: ElasticityOptions) {
 
     async function index (indexName: string, fn = bulkIndexNoop) {
       const bulkBody: any[] = []
+      const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
         const action = fn(chunk)
         bulkBody.push({ index: { _index: indexName, ...action } })
         bulkBody.push(chunk)
+        stats.total++
 
         if (bulkBody.length === bulkSize * 2) {
           await bulkOperation(bulkBody)
@@ -119,17 +131,22 @@ function build (opts: ElasticityOptions) {
         }
       }
 
-      return { failed }
+      stats.time = Date.now() - startTime
+      stats.successful = stats.total - stats.failed
+
+      return stats
     }
 
     async function create (indexName: string, fn = bulkIndexNoop) {
       const bulkBody: any[] = []
+      const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
         const action = fn(chunk)
         bulkBody.push({ create: { _index: indexName, ...action } })
         bulkBody.push(chunk)
+        stats.total++
 
         if (bulkBody.length === bulkSize * 2) {
           await bulkOperation(bulkBody)
@@ -137,17 +154,22 @@ function build (opts: ElasticityOptions) {
         }
       }
 
-      return { failed }
+      stats.time = Date.now() - startTime
+      stats.successful = stats.total - stats.failed
+
+      return stats
     }
 
     async function update (indexName: string, fn = bulkUpdateNoop) {
       const bulkBody: any[] = []
+      const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
         const [action, payload] = fn(chunk)
         bulkBody.push({ update: { _index: indexName, ...action } })
         bulkBody.push({ doc: chunk, ...payload })
+        stats.total++
 
         if (bulkBody.length === bulkSize * 2) {
           await bulkOperation(bulkBody)
@@ -155,16 +177,21 @@ function build (opts: ElasticityOptions) {
         }
       }
 
-      return { failed }
+      stats.time = Date.now() - startTime
+      stats.successful = stats.total - stats.failed
+
+      return stats
     }
 
     async function _delete (indexName: string, fn = bulkIndexNoop) {
       const bulkBody: any[] = []
+      const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
         const action = fn(chunk)
         bulkBody.push({ delete: { _index: indexName, ...action } })
+        stats.total++
 
         if (bulkBody.length === bulkSize) {
           await bulkOperation(bulkBody)
@@ -172,7 +199,10 @@ function build (opts: ElasticityOptions) {
         }
       }
 
-      return { failed }
+      stats.time = Date.now() - startTime
+      stats.successful = stats.total - stats.failed
+
+      return stats
     }
 
     async function bulkOperation (bulkBody: any[]) {
@@ -195,7 +225,7 @@ function build (opts: ElasticityOptions) {
       if (retry.length > 0) {
         for (let i = 0, len = retry.length; i < len; i = i + 2) {
           const operation = Object.keys(retry[i])[0]
-          const failedDoc = {
+          onDropFn({
             status: 429,
             error: null,
             operation: retry[i],
@@ -203,9 +233,8 @@ function build (opts: ElasticityOptions) {
               ? bulkBody[i + 1]
               : null,
             retried: isRetrying
-          }
-          onDropFn(failedDoc)
-          failed.push(failedDoc)
+          })
+          stats.failed++
         }
       }
 
@@ -227,7 +256,7 @@ function build (opts: ElasticityOptions) {
                 retry.push(bulkBody[indexSlice + 1])
               }
             } else {
-              const failedDoc = {
+              onDropFn({
                 status: status,
                 error: action[operation].error,
                 operation: bulkBody[indexSlice],
@@ -235,9 +264,8 @@ function build (opts: ElasticityOptions) {
                   ? bulkBody[indexSlice + 1]
                   : null,
                 retried: isRetrying
-              }
-              onDropFn(failedDoc)
-              failed.push(failedDoc)
+              })
+              stats.failed++
             }
           }
         }
@@ -246,4 +274,4 @@ function build (opts: ElasticityOptions) {
   }
 }
 
-export default build
+export { helper }
