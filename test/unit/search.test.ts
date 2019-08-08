@@ -2,8 +2,8 @@
 
 import { test } from 'tap'
 import { Client } from '@elastic/elasticsearch'
-import { buildServer } from './utils'
-import elasticDsl from '../src'
+import { buildServer } from '../utils'
+import { helper } from '../../src'
 
 test('Search should have an additional documents property', t => {
   t.plan(5)
@@ -24,7 +24,7 @@ test('Search should have an additional documents property', t => {
   buildServer(handler, async (port, server) => {
     t.teardown(server.stop)
     const client = new Client({ node: `http://localhost:${port}` })
-    const { search } = elasticDsl({ client })
+    const { search } = helper({ client })
     const result = await search({
       index: 'test',
       body: { foo: 'bar' }

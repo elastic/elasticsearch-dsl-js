@@ -5,8 +5,8 @@ import { join } from 'path'
 import split from 'split2'
 import { test } from 'tap'
 import { Client, errors } from '@elastic/elasticsearch'
-import { buildServer } from './utils'
-import elasticDsl from '../src'
+import { buildServer } from '../utils'
+import { helper } from '../../src'
 
 const dataset = [
   { user: 'jon', age: 23 },
@@ -17,7 +17,7 @@ const dataset = [
 test('bulk index', t => {
   t.test('datasource as array', t => {
     t.test('Should perform a bulk request', t => {
-      t.plan(13)
+      t.plan(14)
 
       let count = 0
       async function handler (req, res) {
@@ -44,8 +44,8 @@ test('bulk index', t => {
 
       buildServer(handler, async (port, server) => {
         const client = new Client({ node: `http://localhost:${port}` })
-        const { bulkHelper } = elasticDsl({ client })
-        const b = bulkHelper({
+        const { bulk } = helper({ client })
+        const b = bulk({
           datasource: dataset.slice(),
           bulkSize: 1
         })
@@ -57,12 +57,18 @@ test('bulk index', t => {
         })
 
         const result = await b.index('test')
-        t.deepEqual(result, { failed: [] })
+        t.type(result.time, 'number')
+        t.match(result, {
+          total: 3,
+          successful: 3,
+          failed: 0,
+          aborted: false
+        })
       })
     })
 
     t.test('Should perform a bulk request (custom action)', t => {
-      t.plan(13)
+      t.plan(14)
 
       let count = 0
       async function handler (req, res) {
@@ -89,8 +95,8 @@ test('bulk index', t => {
 
       buildServer(handler, async (port, server) => {
         const client = new Client({ node: `http://localhost:${port}` })
-        const { bulkHelper } = elasticDsl({ client })
-        const b = bulkHelper({
+        const { bulk } = helper({ client })
+        const b = bulk({
           datasource: dataset.slice(),
           bulkSize: 1
         })
@@ -103,12 +109,18 @@ test('bulk index', t => {
 
         let id = 0
         const result = await b.index('test', doc => ({ _id: id++ }))
-        t.deepEqual(result, { failed: [] })
+        t.type(result.time, 'number')
+        t.match(result, {
+          total: 3,
+          successful: 3,
+          failed: 0,
+          aborted: false
+        })
       })
     })
 
     t.test('Should perform a bulk request (retry)', t => {
-      t.plan(12)
+      t.plan(13)
 
       async function handler (req, res) {
         t.strictEqual(req.url, '/_bulk')
@@ -144,8 +156,8 @@ test('bulk index', t => {
 
       buildServer(handler, async (port, server) => {
         const client = new Client({ node: `http://localhost:${port}` })
-        const { bulkHelper } = elasticDsl({ client })
-        const b = bulkHelper({
+        const { bulk } = helper({ client })
+        const b = bulk({
           datasource: dataset.slice(),
           bulkSize: 1,
           wait: 10
@@ -164,20 +176,18 @@ test('bulk index', t => {
         })
 
         const result = await b.index('test')
-        t.deepEqual(result, {
-          failed: [{
-            status: 429,
-            error: null,
-            operation: { index: { _index: 'test' } },
-            document: { user: 'arya', age: 18 },
-            retried: true
-          }]
+        t.type(result.time, 'number')
+        t.match(result, {
+          total: 3,
+          successful: 2,
+          failed: 1,
+          aborted: false
         })
       })
     })
 
     t.test('Should perform a bulk request (failure)', t => {
-      t.plan(8)
+      t.plan(9)
 
       async function handler (req, res) {
         t.strictEqual(req.url, '/_bulk')
@@ -214,8 +224,8 @@ test('bulk index', t => {
 
       buildServer(handler, async (port, server) => {
         const client = new Client({ node: `http://localhost:${port}` })
-        const { bulkHelper } = elasticDsl({ client })
-        const b = bulkHelper({
+        const { bulk } = helper({ client })
+        const b = bulk({
           datasource: dataset.slice(),
           bulkSize: 1,
           wait: 10
@@ -234,14 +244,12 @@ test('bulk index', t => {
         })
 
         const result = await b.index('test')
-        t.deepEqual(result, {
-          failed: [{
-            status: 400,
-            error: { something: 'went wrong' },
-            operation: { index: { _index: 'test' } },
-            document: { user: 'arya', age: 18 },
-            retried: false
-          }]
+        t.type(result.time, 'number')
+        t.match(result, {
+          total: 3,
+          successful: 2,
+          failed: 1,
+          aborted: false
         })
       })
     })
@@ -257,8 +265,8 @@ test('bulk index', t => {
 
       buildServer(handler, async (port, server) => {
         const client = new Client({ node: `http://localhost:${port}` })
-        const { bulkHelper } = elasticDsl({ client })
-        const b = bulkHelper({
+        const { bulk } = helper({ client })
+        const b = bulk({
           datasource: dataset.slice(),
           bulkSize: 1
         })
@@ -278,12 +286,74 @@ test('bulk index', t => {
       })
     })
 
+    t.test('Should abort a bulk request', t => {
+      t.plan(6)
+
+      async function handler (req, res) {
+        t.strictEqual(req.url, '/_bulk')
+        t.match(req.headers, { 'content-type': 'application/x-ndjson' })
+
+        let body = ''
+        req.setEncoding('utf8')
+        for await (const chunk of req) {
+          body += chunk
+        }
+        const [, payload] = body.split('\n')
+
+        res.setHeader('content-type', 'application/json')
+
+        if (JSON.parse(payload).user === 'arya') {
+          res.end(JSON.stringify({
+            took: 0,
+            errors: true,
+            items: [{
+              index: {
+                status: 400,
+                error: { something: 'went wrong' }
+              }
+            }]
+          }))
+        } else {
+          res.end(JSON.stringify({
+            took: 0,
+            errors: false,
+            items: []
+          }))
+        }
+      }
+
+      buildServer(handler, async (port, server) => {
+        const client = new Client({ node: `http://localhost:${port}` })
+        const { bulk } = helper({ client })
+        const b = bulk({
+          datasource: dataset.slice(),
+          bulkSize: 1,
+          wait: 10
+        })
+
+        t.teardown(server.stop)
+
+        b.onDrop(doc => {
+          b.abort()
+        })
+
+        const result = await b.index('test')
+        t.type(result.time, 'number')
+        t.match(result, {
+          total: 2,
+          successful: 1,
+          failed: 1,
+          aborted: true
+        })
+      })
+    })
+
     t.end()
   })
 
   t.test('datasource as stream', t => {
     t.test('Should perform a bulk request', t => {
-      t.plan(13)
+      t.plan(14)
 
       let count = 0
       async function handler (req, res) {
@@ -309,10 +379,10 @@ test('bulk index', t => {
       }
 
       buildServer(handler, async (port, server) => {
-        const dataset = createReadStream(join(__dirname, 'fixtures', 'small-dataset.ndjson'), 'utf8')
+        const dataset = createReadStream(join(__dirname, '..', 'fixtures', 'small-dataset.ndjson'), 'utf8')
         const client = new Client({ node: `http://localhost:${port}` })
-        const { bulkHelper } = elasticDsl({ client })
-        const b = bulkHelper({
+        const { bulk } = helper({ client })
+        const b = bulk({
           datasource: dataset.pipe(split()),
           bulkSize: 1
         })
@@ -325,7 +395,13 @@ test('bulk index', t => {
 
         let id = 0
         const result = await b.index('test', doc => ({ _id: id++ }))
-        t.deepEqual(result, { failed: [] })
+        t.type(result.time, 'number')
+        t.match(result, {
+          total: 3,
+          successful: 3,
+          failed: 0,
+          aborted: false
+        })
       })
     })
 
@@ -337,7 +413,7 @@ test('bulk index', t => {
 
 test('bulk create', t => {
   t.test('Should perform a bulk request', t => {
-    t.plan(13)
+    t.plan(14)
 
     let count = 0
     async function handler (req, res) {
@@ -364,8 +440,8 @@ test('bulk create', t => {
 
     buildServer(handler, async (port, server) => {
       const client = new Client({ node: `http://localhost:${port}` })
-      const { bulkHelper } = elasticDsl({ client })
-      const b = bulkHelper({
+      const { bulk } = helper({ client })
+      const b = bulk({
         datasource: dataset.slice(),
         bulkSize: 1
       })
@@ -380,7 +456,13 @@ test('bulk create', t => {
       const result = await b.create('test', doc => {
         return { _id: id++ }
       })
-      t.deepEqual(result, { failed: [] })
+      t.type(result.time, 'number')
+      t.match(result, {
+        total: 3,
+        successful: 3,
+        failed: 0,
+        aborted: false
+      })
     })
   })
   t.end()
@@ -388,7 +470,7 @@ test('bulk create', t => {
 
 test('bulk update', t => {
   t.test('Should perform a bulk request', t => {
-    t.plan(13)
+    t.plan(14)
 
     let count = 0
     async function handler (req, res) {
@@ -415,8 +497,8 @@ test('bulk update', t => {
 
     buildServer(handler, async (port, server) => {
       const client = new Client({ node: `http://localhost:${port}` })
-      const { bulkHelper } = elasticDsl({ client })
-      const b = bulkHelper({
+      const { bulk } = helper({ client })
+      const b = bulk({
         datasource: dataset.slice(),
         bulkSize: 1
       })
@@ -431,7 +513,13 @@ test('bulk update', t => {
       const result = await b.update('test', doc => {
         return [{ _id: id++ }, { doc_as_upsert: true }]
       })
-      t.deepEqual(result, { failed: [] })
+      t.type(result.time, 'number')
+      t.match(result, {
+        total: 3,
+        successful: 3,
+        failed: 0,
+        aborted: false
+      })
     })
   })
   t.end()
@@ -439,7 +527,7 @@ test('bulk update', t => {
 
 test('bulk delete', t => {
   t.test('Should perform a bulk request', t => {
-    t.plan(10)
+    t.plan(11)
 
     let count = 0
     async function handler (req, res) {
@@ -464,8 +552,8 @@ test('bulk delete', t => {
 
     buildServer(handler, async (port, server) => {
       const client = new Client({ node: `http://localhost:${port}` })
-      const { bulkHelper } = elasticDsl({ client })
-      const b = bulkHelper({
+      const { bulk } = helper({ client })
+      const b = bulk({
         datasource: dataset.slice(),
         bulkSize: 1
       })
@@ -480,12 +568,18 @@ test('bulk delete', t => {
       const result = await b.delete('test', doc => {
         return { _id: id++ }
       })
-      t.deepEqual(result, { failed: [] })
+      t.type(result.time, 'number')
+      t.match(result, {
+        total: 3,
+        successful: 3,
+        failed: 0,
+        aborted: false
+      })
     })
   })
 
   t.test('Should perform a bulk request (failure)', t => {
-    t.plan(8)
+    t.plan(9)
 
     async function handler (req, res) {
       t.strictEqual(req.url, '/_bulk')
@@ -521,8 +615,8 @@ test('bulk delete', t => {
 
     buildServer(handler, async (port, server) => {
       const client = new Client({ node: `http://localhost:${port}` })
-      const { bulkHelper } = elasticDsl({ client })
-      const b = bulkHelper({
+      const { bulk } = helper({ client })
+      const b = bulk({
         datasource: dataset.slice(),
         bulkSize: 1,
         wait: 10
@@ -544,14 +638,12 @@ test('bulk delete', t => {
       const result = await b.delete('test', doc => {
         return { _id: id++ }
       })
-      t.deepEqual(result, {
-        failed: [{
-          status: 400,
-          error: { something: 'went wrong' },
-          operation: { delete: { _index: 'test', _id: 1 } },
-          document: null,
-          retried: false
-        }]
+      t.type(result.time, 'number')
+      t.match(result, {
+        total: 3,
+        successful: 2,
+        failed: 1,
+        aborted: false
       })
     })
   })
