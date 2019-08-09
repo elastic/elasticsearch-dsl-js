@@ -67,10 +67,9 @@ def buildDockerImage(args) {
   def image
   retry(3) {
     sleep randomNumber(min: 5, max: 10)
-      image = docker.image(args.image)
-      // make sure we have the latest available from Docker Hub
-      image.pull()
-    }
+    image = docker.image(args.image)
+    // make sure we have the latest available from Docker Hub
+    image.pull()
   }
   return image
 }
