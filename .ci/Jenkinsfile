@@ -77,7 +77,6 @@ def buildTest(args) {
   return {
     node('docker && immutable') {
       stage('Install dependencies') {
-        options { skipDefaultCheckout() }
         steps {
           deleteDir()
           unstash 'source'
@@ -95,7 +94,6 @@ def buildTest(args) {
     }
 
     stage('Linter') {
-      options { skipDefaultCheckout() }
       steps {
         deleteDir()
         unstash "source-dependencies-${args.version}"
@@ -110,7 +108,6 @@ def buildTest(args) {
     }
 
     stage('Unit Test') {
-      options { skipDefaultCheckout() }
       steps {
         deleteDir()
         unstash "source-dependencies-${args.version}"
@@ -125,7 +122,6 @@ def buildTest(args) {
     }
 
     stage('Integration Test') {
-      options { skipDefaultCheckout() }
       steps {
         deleteDir()
         unstash "source-dependencies-${args.version}"
