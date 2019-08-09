@@ -77,71 +77,63 @@ def buildTest(args) {
   return {
     node('docker && immutable') {
       stage('Install dependencies') {
-        steps {
-          deleteDir()
-          unstash 'source'
-          script {
-            buildDockerImage(image: "node:${args.version}-alpine").inside(){
-              dir("${BASE_DIR}"){
-                sh(label: 'System info', script: 'node --version; npm --version')
-                sh(label: 'Install dependencies', script: 'npm install')
-              }
+        deleteDir()
+        unstash 'source'
+        script {
+          buildDockerImage(image: "node:${args.version}-alpine").inside(){
+            dir("${BASE_DIR}"){
+              sh(label: 'System info', script: 'node --version; npm --version')
+              sh(label: 'Install dependencies', script: 'npm install')
             }
           }
-          stash allowEmpty: true, name: "source-dependencies-${args.version}", useDefaultExcludes: false
         }
+        stash allowEmpty: true, name: "source-dependencies-${args.version}", useDefaultExcludes: false
       }
     }
 
     stage('Linter') {
-      steps {
-        deleteDir()
-        unstash "source-dependencies-${args.version}"
-        script {
-          buildDockerImage(image: "node:${args.version}-alpine").inside(){
-            dir("${BASE_DIR}"){
-              sh(label: 'Run unit test', script: 'npm run lint')
-            }
+      deleteDir()
+      unstash "source-dependencies-${args.version}"
+      script {
+        buildDockerImage(image: "node:${args.version}-alpine").inside(){
+          dir("${BASE_DIR}"){
+            sh(label: 'Run unit test', script: 'npm run lint')
           }
         }
       }
     }
 
     stage('Unit Test') {
-      steps {
-        deleteDir()
-        unstash "source-dependencies-${args.version}"
-        script {
-          buildDockerImage(image: "node:${args.version}-alpine").inside(){
-            dir("${BASE_DIR}"){
-              sh(label: 'Run unit test', script: 'npm run test:unit')
-            }
+      deleteDir()
+      unstash "source-dependencies-${args.version}"
+      script {
+        buildDockerImage(image: "node:${args.version}-alpine").inside(){
+          dir("${BASE_DIR}"){
+            sh(label: 'Run unit test', script: 'npm run test:unit')
           }
         }
       }
     }
 
     stage('Integration Test') {
-      steps {
-        deleteDir()
-        unstash "source-dependencies-${args.version}"
-        dir("${BASE_DIR}"){
-          // Sometimes the docker registry fails and has random timeouts
-          // this block will retry a doker image 3 times before to fail.
-          retry(3) {
-            sleep randomNumber(min: 5, max: 10)
-            sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
-          }
+      deleteDir()
+      unstash "source-dependencies-${args.version}"
+      dir("${BASE_DIR}"){
+        // Sometimes the docker registry fails and has random timeouts
+        // this block will retry a doker image 3 times before to fail.
+        retry(3) {
+          sleep randomNumber(min: 5, max: 10)
+          sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
         }
-        script {
-          buildDockerImage(image: "node:${args.version}-alpine").inside(){
-            dir("${BASE_DIR}"){
-              sh(label: 'Run unit test', script: 'npm run test:integration')
-            }
-          }
-        }
-        sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
       }
+      script {
+        buildDockerImage(image: "node:${args.version}-alpine").inside(){
+          dir("${BASE_DIR}"){
+            sh(label: 'Run unit test', script: 'npm run test:integration')
+          }
+        }
+      }
+      sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
     }
   }
 }
