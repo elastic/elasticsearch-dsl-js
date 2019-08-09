@@ -5,14 +5,11 @@
 def NODE_JS_VERSIONS = [10,12]
 
 pipeline {
-  agent {
-    label 'docker && immutable'
-  }
+  agent none
 
   environment {
     REPO = 'elasticsearch-dsl-js'
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
-    NODE_JS_DEFAULT_VERSION = "${nodeJsVersion}"
     NODE_JS_VERSIONS = "${NODE_JS_VERSIONS.join(',')}"
     HOME = "${env.WORKSPACE}"
     npm_config_cache = 'npm-cache'
@@ -90,7 +87,7 @@ def buildTest(args) {
               }
             }
           }
-          stash allowEmpty: true, name: 'source-dependencies', useDefaultExcludes: false
+          stash allowEmpty: true, name: "source-dependencies-${args.version}", useDefaultExcludes: false
         }
       }
     }
@@ -98,14 +95,12 @@ def buildTest(args) {
     stage('Linter') {
       options { skipDefaultCheckout() }
       steps {
-        withGithubNotify(context: 'Linter') {
-          deleteDir()
-          unstash 'source-dependencies'
-          script {
-            buildDockerImage(image: "node:${args.version}-alpine").inside(){
-              dir("${BASE_DIR}"){
-                sh(label: 'Run unit test', script: 'npm run lint')
-              }
+        deleteDir()
+        unstash "source-dependencies-${args.version}"
+        script {
+          buildDockerImage(image: "node:${args.version}-alpine").inside(){
+            dir("${BASE_DIR}"){
+              sh(label: 'Run unit test', script: 'npm run lint')
             }
           }
         }
@@ -115,14 +110,12 @@ def buildTest(args) {
     stage('Unit Test') {
       options { skipDefaultCheckout() }
       steps {
-        withGithubNotify(context: 'Unit Test') {
-          deleteDir()
-          unstash 'source-dependencies'
-          script {
-            buildDockerImage(image: "node:${args.version}-alpine").inside(){
-              dir("${BASE_DIR}"){
-                sh(label: 'Run unit test', script: 'npm run test:unit')
-              }
+        deleteDir()
+        unstash "source-dependencies-${args.version}"
+        script {
+          buildDockerImage(image: "node:${args.version}-alpine").inside(){
+            dir("${BASE_DIR}"){
+              sh(label: 'Run unit test', script: 'npm run test:unit')
             }
           }
         }
@@ -132,26 +125,24 @@ def buildTest(args) {
     stage('Integration Test') {
       options { skipDefaultCheckout() }
       steps {
-        withGithubNotify(context: 'Integration Test') {
-          deleteDir()
-          unstash 'source-dependencies'
-          dir("${BASE_DIR}"){
-            // Sometimes the docker registry fails and has random timeouts
-            // this block will retry a doker image 3 times before to fail.
-            retry(3) {
-              sleep randomNumber(min: 5, max: 10)
-              sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
-            }
+        deleteDir()
+        unstash "source-dependencies-${args.version}"
+        dir("${BASE_DIR}"){
+          // Sometimes the docker registry fails and has random timeouts
+          // this block will retry a doker image 3 times before to fail.
+          retry(3) {
+            sleep randomNumber(min: 5, max: 10)
+            sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
           }
-          script {
-            buildDockerImage(image: "node:${args.version}-alpine").inside(){
-              dir("${BASE_DIR}"){
-                sh(label: 'Run unit test', script: 'npm run test:integration')
-              }
-            }
-          }
-          sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
         }
+        script {
+          buildDockerImage(image: "node:${args.version}-alpine").inside(){
+            dir("${BASE_DIR}"){
+              sh(label: 'Run unit test', script: 'npm run test:integration')
+            }
+          }
+        }
+        sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
       }
     }
   }
