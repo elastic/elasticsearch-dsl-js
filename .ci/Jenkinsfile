@@ -5,7 +5,9 @@
 def NODE_JS_VERSIONS = [10,12]
 
 pipeline {
-  agent none
+  agent {
+    label 'docker && immutable'
+  }
 
   environment {
     REPO = 'elasticsearch-dsl-js'
