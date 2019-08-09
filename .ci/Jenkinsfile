@@ -1,0 +1,159 @@
+#!/usr/bin/env groovy
+
+@Library('apm@current') _
+
+def NODE_JS_VERSIONS = [10,12]
+
+pipeline {
+  agent {
+    label 'docker && immutable'
+  }
+
+  environment {
+    REPO = 'elasticsearch-dsl-js'
+    BASE_DIR = "src/github.com/elastic/${env.REPO}"
+    NODE_JS_DEFAULT_VERSION = "${nodeJsVersion}"
+    NODE_JS_VERSIONS = "${NODE_JS_VERSIONS.join(',')}"
+    HOME = "${env.WORKSPACE}"
+    npm_config_cache = 'npm-cache'
+  }
+
+  options {
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '20', daysToKeepStr: '30'))
+    timestamps()
+    ansiColor('xterm')
+    disableResume()
+    durabilityHint('PERFORMANCE_OPTIMIZED')
+  }
+
+  triggers {
+    issueCommentTrigger('(?i).*(?:jenkins\\W+)?run\\W+(?:the\\W+)?tests(?:\\W+please)?.*')
+    // changeRequest() will return true in case of a commit or a pr
+    // we will have a daily cron job only ofr branches that don't have an active pr
+    cron(changeRequest() ? '' : '@daily')
+  }
+
+  stages {
+    stage('Checkout') {
+      options { skipDefaultCheckout() }
+      steps {
+        deleteDir()
+        gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false)
+        stash allowEmpty: true, name: 'source', useDefaultExcludes: false
+      }
+    }
+
+    stage('Test') {
+      failFast true
+      options { skipDefaultCheckout() }
+      steps {
+        script {
+          def versions = env.NODE_JS_VERSIONS.split(',')
+          def parallelTasks = [:]
+          versions.each{ version ->
+            parallelTasks["Node.js v${version}"] = buildTest(version: version)
+          }
+          parallel(parallelTasks)
+        }
+      }
+    }
+  }
+}
+
+// Sometimes the docker registry fails and has random timeouts
+// this function will retry a doker image 3 times before to fail.
+def buildDockerImage(args) {
+  def image
+  retry(3) {
+    sleep randomNumber(min: 5, max: 10)
+      image = docker.image(args.image)
+      // make sure we have the latest available from Docker Hub
+      image.pull()
+    }
+  }
+  return image
+}
+
+def buildTest(args) {
+  return {
+    node('docker && immutable') {
+      stage('Install dependencies') {
+        options { skipDefaultCheckout() }
+        steps {
+          deleteDir()
+          unstash 'source'
+          script {
+            buildDockerImage(image: "node:${args.version}-alpine").inside(){
+              dir("${BASE_DIR}"){
+                sh(label: 'System info', script: 'node --version; npm --version')
+                sh(label: 'Install dependencies', script: 'npm install')
+              }
+            }
+          }
+          stash allowEmpty: true, name: 'source-dependencies', useDefaultExcludes: false
+        }
+      }
+    }
+
+    stage('Linter') {
+      options { skipDefaultCheckout() }
+      steps {
+        withGithubNotify(context: 'Linter') {
+          deleteDir()
+          unstash 'source-dependencies'
+          script {
+            buildDockerImage(image: "node:${args.version}-alpine").inside(){
+              dir("${BASE_DIR}"){
+                sh(label: 'Run unit test', script: 'npm run lint')
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Unit Test') {
+      options { skipDefaultCheckout() }
+      steps {
+        withGithubNotify(context: 'Unit Test') {
+          deleteDir()
+          unstash 'source-dependencies'
+          script {
+            buildDockerImage(image: "node:${args.version}-alpine").inside(){
+              dir("${BASE_DIR}"){
+                sh(label: 'Run unit test', script: 'npm run test:unit')
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Integration Test') {
+      options { skipDefaultCheckout() }
+      steps {
+        withGithubNotify(context: 'Integration Test') {
+          deleteDir()
+          unstash 'source-dependencies'
+          dir("${BASE_DIR}"){
+            // Sometimes the docker registry fails and has random timeouts
+            // this block will retry a doker image 3 times before to fail.
+            retry(3) {
+              sleep randomNumber(min: 5, max: 10)
+              sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
+            }
+          }
+          script {
+            buildDockerImage(image: "node:${args.version}-alpine").inside(){
+              dir("${BASE_DIR}"){
+                sh(label: 'Run unit test', script: 'npm run test:integration')
+              }
+            }
+          }
+          sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
+        }
+      }
+    }
+  }
+}
