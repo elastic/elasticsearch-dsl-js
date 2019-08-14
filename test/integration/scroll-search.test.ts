@@ -60,7 +60,7 @@ beforeEach(async () => {
     const { bulk } = helper({ client })
     await bulk({ datasource: stream })
       .onDrop(() => { throw new Error('Index operation failed' ) })
-      .index('stackoverflow', doc => ({ _id: doc.id }))
+      .index({ _index: 'stackoverflow' }, doc => ({ _id: doc.id }))
   }
 })
 

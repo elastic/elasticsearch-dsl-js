@@ -56,7 +56,7 @@ test('bulk index', t => {
           t.fail('This should never be called')
         })
 
-        const result = await b.index('test')
+        const result = await b.index({ _index: 'test' })
         t.type(result.time, 'number')
         t.match(result, {
           total: 3,
@@ -108,7 +108,7 @@ test('bulk index', t => {
         })
 
         let id = 0
-        const result = await b.index('test', doc => ({ _id: id++ }))
+        const result = await b.index({ _index: 'test' }, doc => ({ _id: id++ }))
         t.type(result.time, 'number')
         t.match(result, {
           total: 3,
@@ -175,7 +175,7 @@ test('bulk index', t => {
           })
         })
 
-        const result = await b.index('test')
+        const result = await b.index({ _index: 'test' })
         t.type(result.time, 'number')
         t.match(result, {
           total: 3,
@@ -243,7 +243,7 @@ test('bulk index', t => {
           })
         })
 
-        const result = await b.index('test')
+        const result = await b.index({ _index: 'test' })
         t.type(result.time, 'number')
         t.match(result, {
           total: 3,
@@ -278,7 +278,7 @@ test('bulk index', t => {
         })
 
         try {
-          await b.index('test')
+          await b.index({ _index: 'test' })
           t.fail('Should throw')
         } catch (err) {
           t.true(err instanceof errors.ResponseError)
@@ -337,7 +337,7 @@ test('bulk index', t => {
           b.abort()
         })
 
-        const result = await b.index('test')
+        const result = await b.index({ _index: 'test' })
         t.type(result.time, 'number')
         t.match(result, {
           total: 2,
@@ -394,7 +394,7 @@ test('bulk index', t => {
         })
 
         let id = 0
-        const result = await b.index('test', doc => ({ _id: id++ }))
+        const result = await b.index({ _index: 'test' }, doc => ({ _id: id++ }))
         t.type(result.time, 'number')
         t.match(result, {
           total: 3,
@@ -453,7 +453,7 @@ test('bulk create', t => {
       })
 
       let id = 0
-      const result = await b.create('test', doc => {
+      const result = await b.create({ _index: 'test' }, doc => {
         return { _id: id++ }
       })
       t.type(result.time, 'number')
@@ -510,7 +510,7 @@ test('bulk update', t => {
       })
 
       let id = 0
-      const result = await b.update('test', doc => {
+      const result = await b.update({ _index: 'test' }, doc => {
         return [{ _id: id++ }, { doc_as_upsert: true }]
       })
       t.type(result.time, 'number')
@@ -565,7 +565,7 @@ test('bulk delete', t => {
       })
 
       let id = 0
-      const result = await b.delete('test', doc => {
+      const result = await b.delete({ _index: 'test' }, doc => {
         return { _id: id++ }
       })
       t.type(result.time, 'number')
@@ -635,7 +635,7 @@ test('bulk delete', t => {
       })
 
       let id = 0
-      const result = await b.delete('test', doc => {
+      const result = await b.delete({ _index: 'test' }, doc => {
         return { _id: id++ }
       })
       t.type(result.time, 'number')
