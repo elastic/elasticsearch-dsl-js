@@ -5,6 +5,15 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 type bulkIndexCallback = (document: any) => any
 type bulkUpdateCallback = (document: any) => any[]
 type onDropCallback = (document: any) => void
+type MetadataFields = Record<string, any>
+
+interface BulkStats {
+  total: number
+  failed: number
+  successful: number
+  time: number
+  aborted: boolean
+}
 
 const bulkIndexNoop: bulkIndexCallback = (doc) => ({})
 const bulkUpdateNoop: bulkUpdateCallback = (doc) => ([{}, {}])
@@ -114,14 +123,14 @@ function helper (opts: ElasticityOptions) {
       return this
     }
 
-    async function index (indexName: string, fn = bulkIndexNoop) {
+    async function index (action: MetadataFields, fn = bulkIndexNoop): Promise<BulkStats> {
       const bulkBody: any[] = []
       const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
-        const action = fn(chunk)
-        bulkBody.push({ index: { _index: indexName, ...action } })
+        const extendAction = fn(chunk)
+        bulkBody.push({ index: { ...action, ...extendAction } })
         bulkBody.push(chunk)
         stats.total++
 
@@ -137,14 +146,14 @@ function helper (opts: ElasticityOptions) {
       return stats
     }
 
-    async function create (indexName: string, fn = bulkIndexNoop) {
+    async function create (action: MetadataFields, fn = bulkIndexNoop): Promise<BulkStats> {
       const bulkBody: any[] = []
       const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
-        const action = fn(chunk)
-        bulkBody.push({ create: { _index: indexName, ...action } })
+        const extendAction = fn(chunk)
+        bulkBody.push({ create: { ...action, ...extendAction } })
         bulkBody.push(chunk)
         stats.total++
 
@@ -160,14 +169,14 @@ function helper (opts: ElasticityOptions) {
       return stats
     }
 
-    async function update (indexName: string, fn = bulkUpdateNoop) {
+    async function update (action: MetadataFields, fn = bulkUpdateNoop): Promise<BulkStats> {
       const bulkBody: any[] = []
       const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
-        const [action, payload] = fn(chunk)
-        bulkBody.push({ update: { _index: indexName, ...action } })
+        const [extendAction, payload] = fn(chunk)
+        bulkBody.push({ update: { ...action, ...extendAction } })
         bulkBody.push({ doc: chunk, ...payload })
         stats.total++
 
@@ -183,14 +192,14 @@ function helper (opts: ElasticityOptions) {
       return stats
     }
 
-    async function _delete (indexName: string, fn = bulkIndexNoop) {
+    async function _delete (action: MetadataFields, fn = bulkIndexNoop): Promise<BulkStats> {
       const bulkBody: any[] = []
       const startTime = Date.now()
 
       for await (const chunk of datasource) {
         if (shouldAbort) break
-        const action = fn(chunk)
-        bulkBody.push({ delete: { _index: indexName, ...action } })
+        const extendAction = fn(chunk)
+        bulkBody.push({ delete: { ...action, ...extendAction } })
         stats.total++
 
         if (bulkBody.length === bulkSize) {
@@ -205,7 +214,7 @@ function helper (opts: ElasticityOptions) {
       return stats
     }
 
-    async function bulkOperation (bulkBody: any[]) {
+    async function bulkOperation (bulkBody: any[]): Promise<void> {
       const retry: any[] = []
       let retrySlice = retries
       let isRetrying = false
