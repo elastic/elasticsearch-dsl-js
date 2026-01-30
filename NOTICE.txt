@@ -1,0 +1,5 @@
+Elasticsearch DSL for JavaScript
+Copyright Elasticsearch B.V. and contributors
+
+This product includes software developed at Elasticsearch B.V.
+(https://www.elastic.co/).
