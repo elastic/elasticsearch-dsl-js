@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/catalog-info.json
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: elasticsearch-dsl-js
+spec:
+  type: library
+  owner: group:devtools-team
+  lifecycle: production
