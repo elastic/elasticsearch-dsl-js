@@ -5,10 +5,7 @@
 
 /**
  * Elasticsearch Query Builder
- *
- * A fluent, type-safe query builder for Elasticsearch
  */
 
 export const VERSION = '0.0.1'
 
-// TODO: Implement your query builder classes here
