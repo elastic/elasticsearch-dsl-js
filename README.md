@@ -1,111 +1,91 @@
-# Elasticsearch DSL for JavaScript/TypeScript
+# Elasticsearch DSL Libraries for JavaScript/TypeScript
 
 [![CI](https://github.com/elastic/elasticsearch-dsl-js/actions/workflows/ci.yml/badge.svg)](https://github.com/elastic/elasticsearch-dsl-js/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-dsl)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A fluent, type-safe query builder for Elasticsearch in JavaScript and TypeScript.
+A collection of fluent, type-safe DSL libraries for Elasticsearch in JavaScript and TypeScript.
+
+## Packages
+
+| Package | Description | npm |
+|---------|-------------|-----|
+| [@elastic/elasticsearch-query-builder](./packages/query-builder) | Query builder for Elasticsearch | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-query-builder)](https://www.npmjs.com/package/@elastic/elasticsearch-query-builder) |
+| [@elastic/elasticsearch-esql-dsl](./packages/esql-dsl) | ES\|QL DSL for Elasticsearch | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-esql-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-esql-dsl) |
+| [@elastic/elasticsearch-search-dsl](./packages/search-dsl) | Search DSL for Elasticsearch | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-search-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-search-dsl) |
 
 ## Installation
 
+Install individual packages as needed:
+
 ```bash
-npm install @elastic/elasticsearch-dsl
+# Query Builder
+npm install @elastic/elasticsearch-query-builder
+
+# ES|QL DSL
+npm install @elastic/elasticsearch-esql-dsl
+
+# Search DSL
+npm install @elastic/elasticsearch-search-dsl
 ```
 
-## Quick Start
+## Development
 
-```typescript
-import { Query, Search } from '@elastic/elasticsearch-dsl'
-import { Client } from '@elastic/elasticsearch'
+### Prerequisites
 
-// Create a search query
-const search = new Search()
-  .query(
-    Query.bool({
-      must: [Query.match('title', 'elasticsearch')],
-      filter: [Query.range('date', { gte: '2024-01-01' })],
-    })
-  )
-  .size(10)
-  .sort('date', 'desc')
+- Node.js 20 or later
+- pnpm 9 or later
 
-// Use with the Elasticsearch client
-const client = new Client({ node: 'http://localhost:9200' })
-const response = await client.search({
-  index: 'my-index',
-  body: search.toJSON(),
-})
+### Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/elastic/elasticsearch-dsl-js.git
+cd elasticsearch-dsl-js
+
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm run build
+
+# Run tests
+pnpm run test
+
+# Run linting
+pnpm run lint
 ```
 
-## Features
+### Available Scripts
 
-- **Type-safe**: Full TypeScript support with autocompletion
-- **Fluent API**: Chainable methods for building queries
-- **Lightweight**: Zero runtime dependencies
-- **Compatible**: Works with `@elastic/elasticsearch` client
+| Command | Description |
+|---------|-------------|
+| `pnpm run build` | Build all packages |
+| `pnpm run test` | Run tests for all packages |
+| `pnpm run test:watch` | Run tests in watch mode |
+| `pnpm run test:coverage` | Run tests with coverage |
+| `pnpm run lint` | Lint all packages |
+| `pnpm run lint:fix` | Fix linting errors |
+| `pnpm run typecheck` | TypeScript type checking |
+| `pnpm run ci` | Run full CI pipeline |
+| `pnpm run clean` | Clean all build artifacts |
 
-## Query Types
+### Working with Individual Packages
 
-### Match Query
+```bash
+# Build a specific package
+pnpm --filter @elastic/elasticsearch-query-builder build
 
-```typescript
-Query.match('title', 'elasticsearch')
-Query.match('title', 'elasticsearch', { operator: 'and', fuzziness: 'AUTO' })
-```
+# Test a specific package
+pnpm --filter @elastic/elasticsearch-esql-dsl test
 
-### Term Query
-
-```typescript
-Query.term('status', 'published')
-Query.terms('status', ['published', 'draft'])
-```
-
-### Range Query
-
-```typescript
-Query.range('date', { gte: '2024-01-01', lte: '2024-12-31' })
-Query.range('price', { gte: 10, lt: 100 })
-```
-
-### Bool Query
-
-```typescript
-Query.bool({
-  must: [Query.match('title', 'elasticsearch')],
-  should: [Query.term('featured', true)],
-  must_not: [Query.term('status', 'deleted')],
-  filter: [Query.range('date', { gte: '2024-01-01' })],
-})
-```
-
-### Other Queries
-
-```typescript
-Query.matchAll()
-Query.matchPhrase('description', 'quick brown fox')
-Query.exists('email')
-Query.prefix('title', 'elast')
-Query.wildcard('title', 'elast*')
-```
-
-## Search Builder
-
-```typescript
-const search = new Search()
-  .query(Query.match('title', 'elasticsearch'))
-  .size(10)
-  .from(0)
-  .sort('date', 'desc')
-  .source(['title', 'date'])
-  .highlight({ title: {}, body: { fragment_size: 150 } })
-
-console.log(search.toJSON())
+# Run tests in watch mode for a package
+pnpm --filter @elastic/elasticsearch-search-dsl test:watch
 ```
 
 ## Node.js Version Support
 
 | Node.js Version | Supported |
-| --------------- | --------- |
+|-----------------|-----------|
 | 20.x            | ✅        |
 | 22.x            | ✅        |
 | 24.x            | ✅        |

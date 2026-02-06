@@ -1,13 +1,13 @@
-# Contributing to Elasticsearch DSL for JavaScript
+# Contributing to Elasticsearch DSL Libraries
 
-Thank you for your interest in contributing to the Elasticsearch DSL library!
+Thank you for your interest in contributing!
 
 ## Development Setup
 
 ### Prerequisites
 
 - Node.js 20 or later
-- npm 10 or later
+- pnpm 9 or later
 
 ### Getting Started
 
@@ -21,31 +21,39 @@ cd elasticsearch-dsl-js
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Run the tests:
 
 ```bash
-npm test
+pnpm test
 ```
 
 ## Development Workflow
 
 ### Available Scripts
 
-| Command               | Description                              |
-| --------------------- | ---------------------------------------- |
-| `npm run build`       | Build the library (CJS + ESM)            |
-| `npm run build:watch` | Build in watch mode                      |
-| `npm test`            | Run tests                                |
-| `npm run test:watch`  | Run tests in watch mode                  |
-| `npm run test:coverage` | Run tests with coverage                |
-| `npm run test:ui`     | Open Vitest UI                           |
-| `npm run lint`        | Check for linting errors                 |
-| `npm run lint:fix`    | Fix linting errors                       |
-| `npm run typecheck`   | Check TypeScript types                   |
-| `npm run ci`          | Run all checks (lint, typecheck, test, build) |
+| Command                 | Description                              |
+| ----------------------- | ---------------------------------------- |
+| `pnpm run build`        | Build all packages                       |
+| `pnpm run test`         | Run tests for all packages               |
+| `pnpm run test:watch`   | Run tests in watch mode                  |
+| `pnpm run test:coverage`| Run tests with coverage                  |
+| `pnpm run lint`         | Check for linting errors                 |
+| `pnpm run lint:fix`     | Fix linting errors                       |
+| `pnpm run typecheck`    | Check TypeScript types                   |
+| `pnpm run ci`           | Run full CI pipeline                     |
+
+### Working with Individual Packages
+
+```bash
+# Build a specific package
+pnpm --filter @elastic/elasticsearch-query-builder build
+
+# Test a specific package
+pnpm --filter @elastic/elasticsearch-esql-dsl test
+```
 
 ### Code Style
 

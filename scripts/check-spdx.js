@@ -18,7 +18,15 @@ const EXPECTED_HEADER = `/*
  */`
 
 const EXTENSIONS = ['.ts', '.js', '.mjs']
-const DIRECTORIES = ['src', 'test', 'scripts']
+const DIRECTORIES = [
+  'packages/query-builder/src',
+  'packages/query-builder/test',
+  'packages/esql-dsl/src',
+  'packages/esql-dsl/test',
+  'packages/search-dsl/src',
+  'packages/search-dsl/test',
+  'scripts',
+]
 
 function getAllFiles(dir, files = []) {
   if (!fs.existsSync(dir)) {

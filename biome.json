@@ -39,7 +39,7 @@
     }
   },
   "files": {
-    "include": ["src/**/*.ts", "test/**/*.ts", "*.config.ts", "scripts/**/*.js"],
-    "ignore": ["node_modules", "dist", "coverage", "*.json"]
+    "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "packages/*/*.config.ts", "scripts/**/*.js"],
+    "ignore": ["node_modules", "dist", "coverage", "*.json", ".turbo"]
   }
 }

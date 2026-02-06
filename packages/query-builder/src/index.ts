@@ -4,14 +4,11 @@
  */
 
 /**
- * Elasticsearch DSL Query Builder
+ * Elasticsearch Query Builder
  *
  * A fluent, type-safe query builder for Elasticsearch
  */
 
 export const VERSION = '0.0.1'
 
-export { Query } from './query'
-export { Search } from './search'
-
-export type * from './types'
+// TODO: Implement your query builder classes here

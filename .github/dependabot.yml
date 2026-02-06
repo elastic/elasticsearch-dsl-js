@@ -15,6 +15,22 @@ updates:
           - "tsup"
           - "@biomejs/*"
           - "rimraf"
+          - "turbo"
+
+  - package-ecosystem: "npm"
+    directory: "/packages/query-builder"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "npm"
+    directory: "/packages/esql-dsl"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "npm"
+    directory: "/packages/search-dsl"
+    schedule:
+      interval: "monthly"
 
   - package-ecosystem: "github-actions"
     directory: "/"

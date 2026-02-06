@@ -64,6 +64,9 @@ typings/
 dist
 lib
 
+# Turborepo
+.turbo
+
 # IDE
 .idea
 .vscode
@@ -74,4 +77,5 @@ lib
 .DS_Store
 Thumbs.db
 
-package-lock.json
+# pnpm lock file (optional - remove line if you want to commit it)
+pnpm-lock.yaml
