@@ -76,6 +76,3 @@ lib
 # OS
 .DS_Store
 Thumbs.db
-
-# pnpm lock file (optional - remove line if you want to commit it)
-pnpm-lock.yaml
