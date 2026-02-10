@@ -36,7 +36,6 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -51,19 +50,13 @@ jobs:
         if: ${{ github.event.inputs.package == 'query-builder' || github.event.inputs.package == 'all' }}
         run: pnpm publish --provenance --access public --no-git-checks
         working-directory: packages/query-builder
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish esql-dsl
         if: ${{ github.event.inputs.package == 'esql-dsl' || github.event.inputs.package == 'all' }}
         run: pnpm publish --provenance --access public --no-git-checks
         working-directory: packages/esql-dsl
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish search-dsl
         if: ${{ github.event.inputs.package == 'search-dsl' || github.event.inputs.package == 'all' }}
         run: pnpm publish --provenance --access public --no-git-checks
         working-directory: packages/search-dsl
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
