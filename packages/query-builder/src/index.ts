@@ -10,3 +10,4 @@
 export const VERSION = '0.0.1'
 
 export { Op, type OpType } from './operators'
+export { escapeValue, isValidIdentifier, escapeIdentifier } from './escaping'
