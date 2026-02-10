@@ -60,7 +60,19 @@ typings/
 # next.js build output
 .next
 
-# compiled code
+# Build output
+dist
 lib
 
+# Turborepo
+.turbo
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
 .DS_Store
+Thumbs.db

@@ -1,0 +1,62 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish'
+        required: true
+        type: choice
+        options:
+          - query-builder
+          - esql-dsl
+          - search-dsl
+          - all
+      branch:
+        description: 'Branch to publish from'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Publish query-builder
+        if: ${{ github.event.inputs.package == 'query-builder' || github.event.inputs.package == 'all' }}
+        run: pnpm publish --provenance --access public --no-git-checks
+        working-directory: packages/query-builder
+
+      - name: Publish esql-dsl
+        if: ${{ github.event.inputs.package == 'esql-dsl' || github.event.inputs.package == 'all' }}
+        run: pnpm publish --provenance --access public --no-git-checks
+        working-directory: packages/esql-dsl
+
+      - name: Publish search-dsl
+        if: ${{ github.event.inputs.package == 'search-dsl' || github.event.inputs.package == 'all' }}
+        run: pnpm publish --provenance --access public --no-git-checks
+        working-directory: packages/search-dsl
