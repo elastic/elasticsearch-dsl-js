@@ -89,6 +89,7 @@ pnpm --filter @elastic/elasticsearch-search-dsl test:watch
 | 20.x            | ✅        |
 | 22.x            | ✅        |
 | 24.x            | ✅        |
+| 25.x            | ✅        |
 
 ## Contributing
 
