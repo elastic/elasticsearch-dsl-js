@@ -1,6 +1,6 @@
 {
   "name": "@elastic/elasticsearch-query-builder",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Elasticsearch Query Builder for JavaScript/TypeScript",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
