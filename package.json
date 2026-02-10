@@ -13,7 +13,7 @@
     "url": "https://github.com/elastic/elasticsearch-dsl-js/issues"
   },
   "homepage": "https://github.com/elastic/elasticsearch-dsl-js#readme",
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20"
   },
