@@ -54,6 +54,9 @@
     "url": "https://github.com/elastic/elasticsearch-dsl-js/issues"
   },
   "homepage": "https://github.com/elastic/elasticsearch-dsl-js/tree/main/packages/esql-dsl#readme",
+  "dependencies": {
+    "@elastic/elasticsearch-query-builder": "workspace:*"
+  },
   "peerDependencies": {
     "@elastic/elasticsearch": ">=8.0.0"
   },
