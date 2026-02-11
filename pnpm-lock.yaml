@@ -44,6 +44,9 @@ importers:
       '@elastic/elasticsearch':
         specifier: '>=8.0.0'
         version: 9.3.0
+      '@elastic/elasticsearch-query-builder':
+        specifier: workspace:*
+        version: link:../query-builder
 
   packages/query-builder:
     dependencies:
