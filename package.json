@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "24.10.11",
+    "@types/node": "24.10.12",
     "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "4.0.18",
     "license-checker": "25.0.1",
