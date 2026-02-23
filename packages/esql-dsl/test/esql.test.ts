@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { describe, expect, it } from 'vitest'
+import { ESQL } from '../src/esql'
+
+describe('ESQL.from()', () => {
+  it('single index', () => {
+    expect(ESQL.from('employees').toString()).toBe('FROM employees')
+  })
+
+  it('multiple indices', () => {
+    expect(ESQL.from('logs-*', 'metrics-*').toString()).toBe('FROM logs-*, metrics-*')
+  })
+
+  it('wildcard patterns pass through unescaped', () => {
+    expect(ESQL.from('logs-*').toString()).toBe('FROM logs-*')
+  })
+
+  it('metadata() chains with new command', () => {
+    expect(ESQL.from('x').metadata('_id', '_score').toString()).toBe(
+      'FROM x\n| METADATA _id, _score'
+    )
+  })
+
+  it('metadata does not mutate original', () => {
+    const from = ESQL.from('a')
+    from.metadata('_id')
+    expect(from.toString()).toBe('FROM a')
+  })
+})
+
+describe('ESQL.row()', () => {
+  it('simple key-value pairs', () => {
+    expect(ESQL.row({ a: 1, b: 'two' }).toString()).toBe('ROW a = 1, b = "two"')
+  })
+
+  it('handles null', () => {
+    expect(ESQL.row({ a: 1, b: null }).toString()).toBe('ROW a = 1, b = null')
+  })
+
+  it('handles boolean', () => {
+    expect(ESQL.row({ active: true }).toString()).toBe('ROW active = true')
+  })
+
+  it('escapes string values', () => {
+    expect(ESQL.row({ name: "O'Brien" }).toString()).toBe('ROW name = "O\'Brien"')
+  })
+})
+
+describe('ESQL.show()', () => {
+  it('SHOW INFO', () => {
+    expect(ESQL.show('INFO').toString()).toBe('SHOW INFO')
+  })
+
+  it('SHOW FUNCTIONS', () => {
+    expect(ESQL.show('FUNCTIONS').toString()).toBe('SHOW FUNCTIONS')
+  })
+})
+
+describe('ESQL.ts()', () => {
+  it('single index', () => {
+    expect(ESQL.ts('metrics').toString()).toBe('TS metrics')
+  })
+
+  it('multiple indices with wildcards', () => {
+    expect(ESQL.ts('metrics-*', 'logs-*').toString()).toBe('TS metrics-*, logs-*')
+  })
+
+  it('metadata() chains', () => {
+    expect(ESQL.ts('m').metadata('_id').toString()).toBe('TS m\n| METADATA _id')
+  })
+})
+
+describe('ESQL.branch()', () => {
+  it('renders empty', () => {
+    expect(ESQL.branch().toString()).toBe('')
+  })
+})
