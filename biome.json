@@ -1,8 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -39,6 +37,6 @@
     }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "coverage", ".turbo"]
+    "includes": ["**", "!**/node_modules", "!**/dist", "!**/coverage", "!**/.turbo"]
   }
 }
