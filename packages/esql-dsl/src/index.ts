@@ -5,7 +5,10 @@
 
 export const VERSION = '0.0.1'
 
-export { InstrumentedExpression, E } from './expression'
+export { ESQLBase } from './base'
 export { col } from './col'
+export { ESQL, BranchCommand, FromCommand, RowCommand, ShowCommand, TsCommand } from './esql'
+export { InstrumentedExpression, E } from './expression'
+export { formatIdentifier } from './identifier'
+export { and_, not_, or_ } from './logical'
 export { esql } from './template'
-export { and_, or_, not_ } from './logical'
