@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { BaseExpression } from '@elastic/elasticsearch-query-builder'
+import { BaseExpression } from '@elastic/elasticsearch-query-builder'
 import { ESQLBase } from './base'
 import { formatIdentifier } from './identifier'
+import { renderWhereOptions, type WhereOptions } from './where-options'
+
+export type { WhereOptions }
 
 type ExpressionArg = string | BaseExpression
 
@@ -23,8 +26,16 @@ function renderNamedExpressions(columns: Record<string, ExpressionArg>): string 
 }
 
 export abstract class ESQLQuery extends ESQLBase {
-  where(expression: ExpressionArg): ESQLQuery {
-    return new WhereCommand(this, expression)
+  where(expression: ExpressionArg): ESQLQuery
+  where(options: WhereOptions): ESQLQuery
+  where(expressionOrOptions: ExpressionArg | WhereOptions): ESQLQuery {
+    if (typeof expressionOrOptions === 'string') {
+      return new WhereCommand(this, expressionOrOptions)
+    }
+    if (expressionOrOptions instanceof BaseExpression) {
+      return new WhereCommand(this, expressionOrOptions)
+    }
+    return new WhereCommand(this, renderWhereOptions(expressionOrOptions as WhereOptions))
   }
 
   eval(columns: Record<string, ExpressionArg>): ESQLQuery
