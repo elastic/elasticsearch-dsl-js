@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { E, f } from '../../src'
+import { E, ESQL, f } from '../../src'
 
 describe('aggregation functions', () => {
   it('avg', () => {
@@ -70,15 +70,11 @@ describe('aggregation functions', () => {
   })
 
   it('works inside stats()', () => {
-    const { ESQL } = require('../../src')
-    const q = ESQL.from('employees')
-      .stats({ avg_sal: f.avg('salary') })
-      .by('dept')
+    const q = ESQL.from('employees').stats({ avg_sal: f.avg('salary') }).by('dept')
     expect(q.render()).toBe('FROM employees\n| STATS avg_sal = AVG(salary) BY dept')
   })
 
   it('works inside eval()', () => {
-    const { ESQL } = require('../../src')
     const q = ESQL.from('employees').eval({ cnt: f.count('name') })
     expect(q.render()).toBe('FROM employees\n| EVAL cnt = COUNT(name)')
   })
