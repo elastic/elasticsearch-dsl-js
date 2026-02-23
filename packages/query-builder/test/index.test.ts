@@ -5,12 +5,12 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  Op,
-  type OpType,
-  VERSION,
   escapeIdentifier,
   escapeValue,
   isValidIdentifier,
+  Op,
+  type OpType,
+  VERSION,
 } from '../src/index'
 
 describe('query-builder', () => {
