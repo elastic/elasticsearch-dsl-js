@@ -70,7 +70,9 @@ describe('aggregation functions', () => {
   })
 
   it('works inside stats()', () => {
-    const q = ESQL.from('employees').stats({ avg_sal: f.avg('salary') }).by('dept')
+    const q = ESQL.from('employees')
+      .stats({ avg_sal: f.avg('salary') })
+      .by('dept')
     expect(q.render()).toBe('FROM employees\n| STATS avg_sal = AVG(salary) BY dept')
   })
 

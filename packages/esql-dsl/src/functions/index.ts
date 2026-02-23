@@ -4,3 +4,4 @@
  */
 
 export * from './aggregation'
+export * from './string'
