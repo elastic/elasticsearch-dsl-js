@@ -4,10 +4,11 @@
  */
 
 import { escapeValue } from '@elastic/elasticsearch-query-builder'
-import { ESQLBase } from './base'
+import type { ESQLBase } from './base'
 import { formatIdentifier } from './identifier'
+import { ESQLQuery } from './query'
 
-class MetadataCommand extends ESQLBase {
+class MetadataCommand extends ESQLQuery {
   private readonly _fields: string[]
 
   constructor(parent: ESQLBase, fields: string[]) {
@@ -22,7 +23,7 @@ class MetadataCommand extends ESQLBase {
   }
 }
 
-export class FromCommand extends ESQLBase {
+export class FromCommand extends ESQLQuery {
   private readonly _indices: string[]
 
   constructor(indices: string[]) {
@@ -42,7 +43,7 @@ export class FromCommand extends ESQLBase {
   }
 }
 
-export class RowCommand extends ESQLBase {
+export class RowCommand extends ESQLQuery {
   private readonly _values: Record<string, unknown>
 
   constructor(values: Record<string, unknown>) {
@@ -58,7 +59,7 @@ export class RowCommand extends ESQLBase {
   }
 }
 
-export class ShowCommand extends ESQLBase {
+export class ShowCommand extends ESQLQuery {
   private readonly _item: 'INFO' | 'FUNCTIONS'
 
   constructor(item: 'INFO' | 'FUNCTIONS') {
@@ -71,7 +72,7 @@ export class ShowCommand extends ESQLBase {
   }
 }
 
-export class TsCommand extends ESQLBase {
+export class TsCommand extends ESQLQuery {
   private readonly _indices: string[]
 
   constructor(indices: string[]) {
@@ -91,7 +92,7 @@ export class TsCommand extends ESQLBase {
   }
 }
 
-export class BranchCommand extends ESQLBase {
+export class BranchCommand extends ESQLQuery {
   protected _renderInternal(): string {
     return ''
   }

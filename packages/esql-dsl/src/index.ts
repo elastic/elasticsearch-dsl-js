@@ -11,4 +11,5 @@ export { BranchCommand, ESQL, FromCommand, RowCommand, ShowCommand, TsCommand } 
 export { E, InstrumentedExpression } from './expression'
 export { formatIdentifier } from './identifier'
 export { and_, not_, or_ } from './logical'
+export { ESQLQuery, type StatsQuery } from './query'
 export { esql } from './template'
