@@ -4,6 +4,7 @@
  */
 
 export * from './aggregation'
+export * from './chicken'
 export * from './conditional'
 export * from './conversion'
 export * from './date'
