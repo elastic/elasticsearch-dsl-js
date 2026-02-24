@@ -80,4 +80,39 @@ describe('aggregation functions', () => {
     const q = ESQL.from('employees').eval({ cnt: f.count('name') })
     expect(q.render()).toBe('FROM employees\n| EVAL cnt = COUNT(name)')
   })
+
+  describe('.where() modifier', () => {
+    it('appends WHERE clause to aggregation', () => {
+      expect(f.avg('salary').where(E('active').eq(true)).toString()).toBe(
+        'AVG(salary) WHERE active == true'
+      )
+    })
+
+    it('works with count', () => {
+      expect(f.count().where(E('status').eq('error')).toString()).toBe(
+        'COUNT(*) WHERE status == "error"'
+      )
+    })
+
+    it('works with complex condition', () => {
+      expect(f.sum('amount').where(E('category').eq('sales')).toString()).toBe(
+        'SUM(amount) WHERE category == "sales"'
+      )
+    })
+
+    it('works inside stats()', () => {
+      const q = ESQL.from('logs').stats({
+        errors: f.count().where(E('level').eq('ERROR')),
+        total: f.count(),
+      })
+      expect(q.render()).toBe(
+        'FROM logs\n| STATS errors = COUNT(*) WHERE level == "ERROR", total = COUNT(*)'
+      )
+    })
+
+    it('returns AggregationExpression that can still chain', () => {
+      const expr = f.avg('salary').where(E('dept').eq('eng'))
+      expect(expr.toString()).toBe('AVG(salary) WHERE dept == "eng"')
+    })
+  })
 })
