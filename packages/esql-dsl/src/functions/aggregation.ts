@@ -4,63 +4,63 @@
  */
 
 import type { ExpressionLike } from '@elastic/elasticsearch-query-builder'
-import { InstrumentedExpression } from '../expression'
-import { fn, renderArg } from '../fn'
+import { AggregationExpression } from '../expression'
+import { aggFn, renderArg } from '../fn'
 
-export function avg(field: ExpressionLike): InstrumentedExpression {
-  return fn('AVG', field)
+export function avg(field: ExpressionLike): AggregationExpression {
+  return aggFn('AVG', field)
 }
 
-export function count(field: ExpressionLike = '*'): InstrumentedExpression {
+export function count(field: ExpressionLike = '*'): AggregationExpression {
   if (field === '*') {
-    return new InstrumentedExpression('COUNT(*)')
+    return new AggregationExpression('COUNT(*)')
   }
-  return fn('COUNT', field)
+  return aggFn('COUNT', field)
 }
 
-export function countDistinct(field: ExpressionLike, precision?: number): InstrumentedExpression {
+export function countDistinct(field: ExpressionLike, precision?: number): AggregationExpression {
   if (precision !== undefined) {
-    return fn('COUNT_DISTINCT', field, precision)
+    return aggFn('COUNT_DISTINCT', field, precision)
   }
-  return fn('COUNT_DISTINCT', field)
+  return aggFn('COUNT_DISTINCT', field)
 }
 
-export function max(field: ExpressionLike): InstrumentedExpression {
-  return fn('MAX', field)
+export function max(field: ExpressionLike): AggregationExpression {
+  return aggFn('MAX', field)
 }
 
-export function min(field: ExpressionLike): InstrumentedExpression {
-  return fn('MIN', field)
+export function min(field: ExpressionLike): AggregationExpression {
+  return aggFn('MIN', field)
 }
 
-export function sum(field: ExpressionLike): InstrumentedExpression {
-  return fn('SUM', field)
+export function sum(field: ExpressionLike): AggregationExpression {
+  return aggFn('SUM', field)
 }
 
-export function median(field: ExpressionLike): InstrumentedExpression {
-  return fn('MEDIAN', field)
+export function median(field: ExpressionLike): AggregationExpression {
+  return aggFn('MEDIAN', field)
 }
 
-export function medianAbsoluteDeviation(field: ExpressionLike): InstrumentedExpression {
-  return fn('MEDIAN_ABSOLUTE_DEVIATION', field)
+export function medianAbsoluteDeviation(field: ExpressionLike): AggregationExpression {
+  return aggFn('MEDIAN_ABSOLUTE_DEVIATION', field)
 }
 
-export function percentile(field: ExpressionLike, p: number): InstrumentedExpression {
-  return fn('PERCENTILE', field, p)
+export function percentile(field: ExpressionLike, p: number): AggregationExpression {
+  return aggFn('PERCENTILE', field, p)
 }
 
-export function values(field: ExpressionLike): InstrumentedExpression {
-  return fn('VALUES', field)
+export function values(field: ExpressionLike): AggregationExpression {
+  return aggFn('VALUES', field)
 }
 
 export function top(
   field: ExpressionLike,
   limit: number,
   order: 'ASC' | 'DESC'
-): InstrumentedExpression {
-  return new InstrumentedExpression(`TOP(${renderArg(field)}, ${limit}, ${order})`)
+): AggregationExpression {
+  return new AggregationExpression(`TOP(${renderArg(field)}, ${limit}, ${order})`)
 }
 
-export function stCentroidAgg(field: ExpressionLike): InstrumentedExpression {
-  return fn('ST_CENTROID_AGG', field)
+export function stCentroidAgg(field: ExpressionLike): AggregationExpression {
+  return aggFn('ST_CENTROID_AGG', field)
 }

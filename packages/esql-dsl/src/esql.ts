@@ -3,10 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { escapeValue } from '@elastic/elasticsearch-query-builder'
+import { BaseExpression, escapeValue } from '@elastic/elasticsearch-query-builder'
 import type { ESQLBase } from './base'
 import { formatIdentifier } from './identifier'
 import { ESQLQuery } from './query'
+
+function renderRowValue(value: unknown): string {
+  if (BaseExpression.isExpression(value)) {
+    return value.toString()
+  }
+  return escapeValue(value)
+}
 
 class MetadataCommand extends ESQLQuery {
   private readonly _fields: string[]
@@ -53,7 +60,7 @@ export class RowCommand extends ESQLQuery {
 
   protected _renderInternal(): string {
     const pairs = Object.entries(this._values).map(
-      ([k, v]) => `${formatIdentifier(k)} = ${escapeValue(v)}`
+      ([k, v]) => `${formatIdentifier(k)} = ${renderRowValue(v)}`
     )
     return `ROW ${pairs.join(', ')}`
   }

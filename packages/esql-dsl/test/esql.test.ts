@@ -4,6 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
+import { f } from '../src'
 import { ESQL } from '../src/esql'
 
 describe('ESQL.from()', () => {
@@ -47,6 +48,10 @@ describe('ESQL.row()', () => {
 
   it('escapes string values', () => {
     expect(ESQL.row({ name: "O'Brien" }).toString()).toBe('ROW name = "O\'Brien"')
+  })
+
+  it('handles expression values', () => {
+    expect(ESQL.row({ a: f.round(1.23, 0) }).toString()).toBe('ROW a = ROUND(1.23, 0)')
   })
 })
 

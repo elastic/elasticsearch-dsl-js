@@ -18,7 +18,7 @@ function renderValue(value: ExpressionLike): string {
 }
 
 export class InstrumentedExpression extends BaseExpression {
-  private readonly _expr: string
+  protected readonly _expr: string
 
   constructor(expr: string) {
     super()
@@ -106,6 +106,12 @@ export class InstrumentedExpression extends BaseExpression {
 
   toString(): string {
     return this._expr
+  }
+}
+
+export class AggregationExpression extends InstrumentedExpression {
+  where(condition: ExpressionLike): AggregationExpression {
+    return new AggregationExpression(`${this._expr} WHERE ${renderValue(condition)}`)
   }
 }
 

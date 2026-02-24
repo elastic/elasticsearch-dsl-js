@@ -9,7 +9,7 @@ import {
   escapeIdentifier,
   escapeValue,
 } from '@elastic/elasticsearch-query-builder'
-import { InstrumentedExpression } from './expression'
+import { AggregationExpression, InstrumentedExpression } from './expression'
 
 export function renderArg(value: ExpressionLike): string {
   if (BaseExpression.isExpression(value)) {
@@ -34,4 +34,8 @@ export function fn(name: string, ...args: ExpressionLike[]): InstrumentedExpress
 
 export function fnLiteral(name: string, ...args: ExpressionLike[]): InstrumentedExpression {
   return new InstrumentedExpression(`${name}(${args.map(renderLiteralArg).join(', ')})`)
+}
+
+export function aggFn(name: string, ...args: ExpressionLike[]): AggregationExpression {
+  return new AggregationExpression(`${name}(${args.map(renderArg).join(', ')})`)
 }
