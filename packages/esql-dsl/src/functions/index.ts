@@ -5,6 +5,7 @@
 
 export * from './aggregation'
 export * from './conditional'
+export * from './conversion'
 export * from './date'
 export * from './math'
 export * from './multivalue'
