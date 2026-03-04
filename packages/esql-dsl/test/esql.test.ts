@@ -20,10 +20,8 @@ describe('ESQL.from()', () => {
     expect(ESQL.from('logs-*').toString()).toBe('FROM logs-*')
   })
 
-  it('metadata() chains with new command', () => {
-    expect(ESQL.from('x').metadata('_id', '_score').toString()).toBe(
-      'FROM x\n| METADATA _id, _score'
-    )
+  it('metadata() renders inline with FROM', () => {
+    expect(ESQL.from('x').metadata('_id', '_score').toString()).toBe('FROM x METADATA _id, _score')
   })
 
   it('metadata does not mutate original', () => {
@@ -74,8 +72,8 @@ describe('ESQL.ts()', () => {
     expect(ESQL.ts('metrics-*', 'logs-*').toString()).toBe('TS metrics-*, logs-*')
   })
 
-  it('metadata() chains', () => {
-    expect(ESQL.ts('m').metadata('_id').toString()).toBe('TS m\n| METADATA _id')
+  it('metadata() renders inline with TS', () => {
+    expect(ESQL.ts('m').metadata('_id').toString()).toBe('TS m METADATA _id')
   })
 })
 

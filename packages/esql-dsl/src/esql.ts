@@ -4,7 +4,6 @@
  */
 
 import { BaseExpression, escapeValue } from '@elastic/elasticsearch-query-builder'
-import type { ESQLBase } from './base'
 import { formatIdentifier } from './identifier'
 import { ESQLQuery } from './query'
 
@@ -15,38 +14,29 @@ function renderRowValue(value: unknown): string {
   return escapeValue(value)
 }
 
-class MetadataCommand extends ESQLQuery {
-  private readonly _fields: string[]
-
-  constructor(parent: ESQLBase, fields: string[]) {
-    super()
-    this.setParent(parent)
-    this._fields = fields
-  }
-
-  protected _renderInternal(): string {
-    const formatted = this._fields.map((f) => formatIdentifier(f)).join(', ')
-    return `METADATA ${formatted}`
-  }
-}
-
 export class FromCommand extends ESQLQuery {
   private readonly _indices: string[]
+  private readonly _metadata: string[] | null
 
-  constructor(indices: string[]) {
+  constructor(indices: string[], metadata?: string[]) {
     super()
     this._indices = indices
+    this._metadata = metadata ?? null
   }
 
   protected _renderInternal(): string {
     const formatted = this._indices
       .map((i) => formatIdentifier(i, { allowPatterns: true }))
       .join(', ')
-    return `FROM ${formatted}`
+    let cmd = `FROM ${formatted}`
+    if (this._metadata && this._metadata.length > 0) {
+      cmd += ` METADATA ${this._metadata.map((f) => formatIdentifier(f)).join(', ')}`
+    }
+    return cmd
   }
 
-  metadata(...fields: string[]): MetadataCommand {
-    return new MetadataCommand(this, fields)
+  metadata(...fields: string[]): FromCommand {
+    return new FromCommand(this._indices, fields)
   }
 }
 
@@ -81,21 +71,27 @@ export class ShowCommand extends ESQLQuery {
 
 export class TsCommand extends ESQLQuery {
   private readonly _indices: string[]
+  private readonly _metadata: string[] | null
 
-  constructor(indices: string[]) {
+  constructor(indices: string[], metadata?: string[]) {
     super()
     this._indices = indices
+    this._metadata = metadata ?? null
   }
 
   protected _renderInternal(): string {
     const formatted = this._indices
       .map((i) => formatIdentifier(i, { allowPatterns: true }))
       .join(', ')
-    return `TS ${formatted}`
+    let cmd = `TS ${formatted}`
+    if (this._metadata && this._metadata.length > 0) {
+      cmd += ` METADATA ${this._metadata.map((f) => formatIdentifier(f)).join(', ')}`
+    }
+    return cmd
   }
 
-  metadata(...fields: string[]): MetadataCommand {
-    return new MetadataCommand(this, fields)
+  metadata(...fields: string[]): TsCommand {
+    return new TsCommand(this._indices, fields)
   }
 }
 
