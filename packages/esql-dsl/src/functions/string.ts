@@ -4,8 +4,8 @@
  */
 
 import type { ExpressionLike } from '@elastic/elasticsearch-query-builder'
-import type { InstrumentedExpression } from '../expression'
-import { fn, fnLiteral } from '../fn'
+import { InstrumentedExpression } from '../expression'
+import { fn, fnLiteral, renderArg, renderLiteralArg } from '../fn'
 
 export function concat(...args: ExpressionLike[]): InstrumentedExpression {
   return fnLiteral('CONCAT', ...args)
@@ -96,4 +96,20 @@ export function toBase64(str: ExpressionLike): InstrumentedExpression {
 
 export function fromBase64(str: ExpressionLike): InstrumentedExpression {
   return fn('FROM_BASE64', str)
+}
+
+export function bitLength(str: ExpressionLike): InstrumentedExpression {
+  return fn('BIT_LENGTH', str)
+}
+
+export function byteLength(str: ExpressionLike): InstrumentedExpression {
+  return fn('BYTE_LENGTH', str)
+}
+
+export function chunk(str: ExpressionLike, ...rest: ExpressionLike[]): InstrumentedExpression {
+  return fn('CHUNK', str, ...rest)
+}
+
+export function contains(str: ExpressionLike, substr: ExpressionLike): InstrumentedExpression {
+  return new InstrumentedExpression(`CONTAINS(${renderArg(str)}, ${renderLiteralArg(substr)})`)
 }

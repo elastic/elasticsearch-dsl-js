@@ -412,6 +412,7 @@ class InlineStatsCommandInternal extends ESQLQuery {
 class ChangePointCommand extends ESQLQuery {
   private readonly _field: string
   private _onKey: string | null = null
+  private _asNames: [string, string] | null = null
 
   constructor(parent: ESQLBase, field: string) {
     super()
@@ -422,6 +423,14 @@ class ChangePointCommand extends ESQLQuery {
   on(key: string): ChangePointCommand {
     const result = new ChangePointCommand(this._parent as ESQLBase, this._field)
     result._onKey = key
+    result._asNames = this._asNames
+    return result
+  }
+
+  as_(typeName: string, pvalueName: string): ChangePointCommand {
+    const result = new ChangePointCommand(this._parent as ESQLBase, this._field)
+    result._onKey = this._onKey
+    result._asNames = [typeName, pvalueName]
     return result
   }
 
@@ -429,6 +438,9 @@ class ChangePointCommand extends ESQLQuery {
     let cmd = `CHANGE_POINT ${formatIdentifier(this._field)}`
     if (this._onKey) {
       cmd += ` ON ${formatIdentifier(this._onKey)}`
+    }
+    if (this._asNames) {
+      cmd += ` AS ${formatIdentifier(this._asNames[0])}, ${formatIdentifier(this._asNames[1])}`
     }
     return cmd
   }

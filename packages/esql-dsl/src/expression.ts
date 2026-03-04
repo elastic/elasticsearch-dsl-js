@@ -104,6 +104,22 @@ export class InstrumentedExpression extends BaseExpression {
     return new InstrumentedExpression(`${this._expr} % ${renderValue(value)}`)
   }
 
+  asc(): InstrumentedExpression {
+    return new InstrumentedExpression(`${this._expr} ASC`)
+  }
+
+  desc(): InstrumentedExpression {
+    return new InstrumentedExpression(`${this._expr} DESC`)
+  }
+
+  nullsFirst(): InstrumentedExpression {
+    return new InstrumentedExpression(`${this._expr} NULLS FIRST`)
+  }
+
+  nullsLast(): InstrumentedExpression {
+    return new InstrumentedExpression(`${this._expr} NULLS LAST`)
+  }
+
   toString(): string {
     return this._expr
   }
