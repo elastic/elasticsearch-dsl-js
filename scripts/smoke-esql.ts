@@ -45,7 +45,7 @@ assert('FROM multiple indices', ESQL.from('logs-1', 'logs-2').render(), 'FROM `l
 assert(
   'FROM with METADATA',
   ESQL.from('logs').metadata('_id', '_version').render(),
-  'FROM logs\n| METADATA _id, _version'
+  'FROM logs METADATA _id, _version'
 )
 
 assert('ROW', ESQL.row({ x: 1, y: 'hello' }).render(), 'ROW x = 1, y = "hello"')

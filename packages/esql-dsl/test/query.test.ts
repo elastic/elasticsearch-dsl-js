@@ -156,7 +156,7 @@ describe('processing commands', () => {
     it('works with metadata chaining', () => {
       const q = ESQL.from('logs').metadata('_id', '_version').where('status = 200').limit(5)
       expect(q.render()).toBe(
-        'FROM logs\n| METADATA _id, _version\n| WHERE status = 200\n| LIMIT 5'
+        'FROM logs METADATA _id, _version\n| WHERE status = 200\n| LIMIT 5'
       )
     })
   })
