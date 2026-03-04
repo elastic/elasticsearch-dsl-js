@@ -57,3 +57,23 @@ export function dateAdd(
     `DATE_ADD(${renderArg(date)}, ${renderArg(amount)}, ${renderLiteralArg(unit)})`
   )
 }
+
+export function dayName(date: ExpressionLike): InstrumentedExpression {
+  return fn('DAY_NAME', date)
+}
+
+export function monthName(date: ExpressionLike): InstrumentedExpression {
+  return fn('MONTH_NAME', date)
+}
+
+export function toDateNanos(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_DATE_NANOS', value)
+}
+
+export function toDateperiod(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_DATEPERIOD', value)
+}
+
+export function toTimeduration(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_TIMEDURATION', value)
+}

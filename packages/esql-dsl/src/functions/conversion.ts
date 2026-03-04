@@ -54,3 +54,23 @@ export function toCartesianPoint(value: ExpressionLike): InstrumentedExpression 
 export function toCartesianShape(value: ExpressionLike): InstrumentedExpression {
   return fn('TO_CARTESIANSHAPE', value)
 }
+
+export function toAggregateMetricDouble(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_AGGREGATE_METRIC_DOUBLE', value)
+}
+
+export function toDenseVector(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_DENSE_VECTOR', value)
+}
+
+export function toGeohash(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_GEOHASH', value)
+}
+
+export function toGeohex(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_GEOHEX', value)
+}
+
+export function toGeotile(value: ExpressionLike): InstrumentedExpression {
+  return fn('TO_GEOTILE', value)
+}

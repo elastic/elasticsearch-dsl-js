@@ -4,8 +4,8 @@
  */
 
 import type { ExpressionLike } from '@elastic/elasticsearch-query-builder'
-import type { InstrumentedExpression } from '../expression'
-import { fn, fnLiteral } from '../fn'
+import { InstrumentedExpression } from '../expression'
+import { fn, fnLiteral, renderArg, renderLiteralArg } from '../fn'
 
 export function mvAvg(field: ExpressionLike): InstrumentedExpression {
   return fn('MV_AVG', field)
@@ -82,4 +82,31 @@ export function mvZip(
 
 export function mvAppend(left: ExpressionLike, right: ExpressionLike): InstrumentedExpression {
   return fn('MV_APPEND', left, right)
+}
+
+export function mvContains(field: ExpressionLike, value: ExpressionLike): InstrumentedExpression {
+  return new InstrumentedExpression(`MV_CONTAINS(${renderArg(field)}, ${renderLiteralArg(value)})`)
+}
+
+export function mvIntersection(
+  left: ExpressionLike,
+  right: ExpressionLike
+): InstrumentedExpression {
+  return fn('MV_INTERSECTION', left, right)
+}
+
+export function mvMedianAbsoluteDeviation(field: ExpressionLike): InstrumentedExpression {
+  return fn('MV_MEDIAN_ABSOLUTE_DEVIATION', field)
+}
+
+export function mvPercentile(field: ExpressionLike, p: number): InstrumentedExpression {
+  return fn('MV_PERCENTILE', field, p)
+}
+
+export function mvPseriesWeightedSum(field: ExpressionLike, p: number): InstrumentedExpression {
+  return fn('MV_PSERIES_WEIGHTED_SUM', field, p)
+}
+
+export function mvUnion(left: ExpressionLike, right: ExpressionLike): InstrumentedExpression {
+  return fn('MV_UNION', left, right)
 }

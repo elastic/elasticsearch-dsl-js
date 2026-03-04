@@ -100,3 +100,51 @@ export function cbrt(value: ExpressionLike): InstrumentedExpression {
 export function hypot(a: ExpressionLike, b: ExpressionLike): InstrumentedExpression {
   return fn('HYPOT', a, b)
 }
+
+export function cosh(value: ExpressionLike): InstrumentedExpression {
+  return fn('COSH', value)
+}
+
+export function sinh(value: ExpressionLike): InstrumentedExpression {
+  return fn('SINH', value)
+}
+
+export function tanh(value: ExpressionLike): InstrumentedExpression {
+  return fn('TANH', value)
+}
+
+export function clamp(
+  value: ExpressionLike,
+  min: ExpressionLike,
+  max: ExpressionLike
+): InstrumentedExpression {
+  return fn('CLAMP', value, min, max)
+}
+
+export function clampMax(value: ExpressionLike, max: ExpressionLike): InstrumentedExpression {
+  return fn('CLAMP_MAX', value, max)
+}
+
+export function clampMin(value: ExpressionLike, min: ExpressionLike): InstrumentedExpression {
+  return fn('CLAMP_MIN', value, min)
+}
+
+export function copySign(magnitude: ExpressionLike, sign: ExpressionLike): InstrumentedExpression {
+  return fn('COPY_SIGN', magnitude, sign)
+}
+
+export function scalb(value: ExpressionLike, exp: ExpressionLike): InstrumentedExpression {
+  return fn('SCALB', value, exp)
+}
+
+export function toDegrees(radians: ExpressionLike): InstrumentedExpression {
+  return fn('TO_DEGREES', radians)
+}
+
+export function toRadians(degrees: ExpressionLike): InstrumentedExpression {
+  return fn('TO_RADIANS', degrees)
+}
+
+export function roundTo(value: ExpressionLike, ...rest: ExpressionLike[]): InstrumentedExpression {
+  return fn('ROUND_TO', value, ...rest)
+}

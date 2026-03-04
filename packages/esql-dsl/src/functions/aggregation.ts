@@ -64,3 +64,43 @@ export function top(
 export function stCentroidAgg(field: ExpressionLike): AggregationExpression {
   return aggFn('ST_CENTROID_AGG', field)
 }
+
+export function absent(field: ExpressionLike): AggregationExpression {
+  return aggFn('ABSENT', field)
+}
+
+export function present(field: ExpressionLike): AggregationExpression {
+  return aggFn('PRESENT', field)
+}
+
+export function first(field: ExpressionLike): AggregationExpression {
+  return aggFn('FIRST', field)
+}
+
+export function last(field: ExpressionLike): AggregationExpression {
+  return aggFn('LAST', field)
+}
+
+export function stdDev(field: ExpressionLike): AggregationExpression {
+  return aggFn('STD_DEV', field)
+}
+
+export function variance(field: ExpressionLike): AggregationExpression {
+  return aggFn('VARIANCE', field)
+}
+
+export function weightedAvg(value: ExpressionLike, weight: ExpressionLike): AggregationExpression {
+  return aggFn('WEIGHTED_AVG', value, weight)
+}
+
+export function sample_(field: ExpressionLike): AggregationExpression {
+  return aggFn('SAMPLE', field)
+}
+
+export function allFirst(field: ExpressionLike): AggregationExpression {
+  return aggFn('ALL_FIRST', field)
+}
+
+export function allLast(field: ExpressionLike): AggregationExpression {
+  return aggFn('ALL_LAST', field)
+}
