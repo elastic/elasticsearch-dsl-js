@@ -32,7 +32,9 @@ describe('rate/change functions', () => {
   })
 
   it('rate in stats', () => {
-    const q = ESQL.ts('metrics').stats({ bytes_rate: f.rate('bytes') }).by('host')
+    const q = ESQL.ts('metrics')
+      .stats({ bytes_rate: f.rate('bytes') })
+      .by('host')
     expect(q.render()).toBe('TS metrics\n| STATS bytes_rate = RATE(bytes) BY host')
   })
 })
@@ -81,9 +83,7 @@ describe('over_time aggregation functions', () => {
   })
 
   it('percentileOverTime', () => {
-    expect(f.percentileOverTime('latency', 99).toString()).toBe(
-      'PERCENTILE_OVER_TIME(latency, 99)'
-    )
+    expect(f.percentileOverTime('latency', 99).toString()).toBe('PERCENTILE_OVER_TIME(latency, 99)')
   })
 
   it('absentOverTime', () => {

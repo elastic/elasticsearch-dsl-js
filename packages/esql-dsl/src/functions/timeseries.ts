@@ -4,9 +4,8 @@
  */
 
 import type { ExpressionLike } from '@elastic/elasticsearch-query-builder'
-import type { AggregationExpression } from '../expression'
-import type { InstrumentedExpression } from '../expression'
-import { aggFn, fn } from '../fn'
+import { type AggregationExpression, InstrumentedExpression } from '../expression'
+import { aggFn, renderArg } from '../fn'
 
 export function rate(field: ExpressionLike): AggregationExpression {
   return aggFn('RATE', field)
@@ -36,14 +35,11 @@ export function tbucket(
   timestamp: ExpressionLike,
   interval: ExpressionLike
 ): InstrumentedExpression {
-  return fn('TBUCKET', timestamp, interval)
+  return new InstrumentedExpression(`TBUCKET(${renderArg(timestamp)}, ${interval})`)
 }
 
-export function trange(
-  timestamp: ExpressionLike,
-  range: ExpressionLike
-): InstrumentedExpression {
-  return fn('TRANGE', timestamp, range)
+export function trange(timestamp: ExpressionLike, range: ExpressionLike): InstrumentedExpression {
+  return new InstrumentedExpression(`TRANGE(${renderArg(timestamp)}, ${range})`)
 }
 
 export function avgOverTime(field: ExpressionLike): AggregationExpression {
@@ -78,10 +74,7 @@ export function lastOverTime(field: ExpressionLike): AggregationExpression {
   return aggFn('LAST_OVER_TIME', field)
 }
 
-export function percentileOverTime(
-  field: ExpressionLike,
-  p: number
-): AggregationExpression {
+export function percentileOverTime(field: ExpressionLike, p: number): AggregationExpression {
   return aggFn('PERCENTILE_OVER_TIME', field, p)
 }
 
