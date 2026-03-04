@@ -87,6 +87,18 @@ export abstract class ESQLQuery extends ESQLBase {
   mvExpand(field: string): ESQLQuery {
     return new MvExpandCommand(this, field)
   }
+
+  lookupJoin(index: string): LookupJoinCommand {
+    return new LookupJoinCommand(this, index)
+  }
+
+  fork(...branches: ESQLBase[]): ForkCommand {
+    return new ForkCommand(this, branches)
+  }
+
+  fuse(strategy: string, options?: { weights?: number[] }): ESQLQuery {
+    return new FuseCommand(this, strategy, options?.weights)
+  }
 }
 
 class WhereCommand extends ESQLQuery {
@@ -282,6 +294,72 @@ class MvExpandCommand extends ESQLQuery {
 
   protected _renderInternal(): string {
     return `MV_EXPAND ${formatIdentifier(this._field)}`
+  }
+}
+
+class LookupJoinCommand extends ESQLQuery {
+  private readonly _index: string
+  private _onField: string | null = null
+
+  constructor(parent: ESQLBase, index: string) {
+    super()
+    this.setParent(parent)
+    this._index = index
+  }
+
+  on(field: string): LookupJoinCommand {
+    const result = new LookupJoinCommand(this._parent as ESQLBase, this._index)
+    result._onField = field
+    return result
+  }
+
+  protected _renderInternal(): string {
+    let cmd = `LOOKUP JOIN ${formatIdentifier(this._index)}`
+    if (this._onField) {
+      cmd += ` ON ${formatIdentifier(this._onField)}`
+    }
+    return cmd
+  }
+}
+
+class ForkCommand extends ESQLQuery {
+  private readonly _branches: ESQLBase[]
+
+  constructor(parent: ESQLBase, branches: ESQLBase[]) {
+    super()
+    this.setParent(parent)
+    this._branches = branches
+  }
+
+  protected _renderInternal(): string {
+    const rendered = this._branches.map((b) => {
+      const branchStr = b
+        .render()
+        .replace(/^\n\| /, '')
+        .replace(/\n\| /g, ' | ')
+      return `  (${branchStr})`
+    })
+    return `FORK\n${rendered.join('\n')}`
+  }
+}
+
+class FuseCommand extends ESQLQuery {
+  private readonly _strategy: string
+  private readonly _weights: number[] | undefined
+
+  constructor(parent: ESQLBase, strategy: string, weights?: number[]) {
+    super()
+    this.setParent(parent)
+    this._strategy = strategy
+    this._weights = weights
+  }
+
+  protected _renderInternal(): string {
+    let cmd = `FUSE ${this._strategy}`
+    if (this._weights && this._weights.length > 0) {
+      cmd += `(${this._weights.join(', ')})`
+    }
+    return cmd
   }
 }
 
