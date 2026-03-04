@@ -79,6 +79,14 @@ export abstract class ESQLQuery extends ESQLBase {
   grok(input: ExpressionArg, pattern: string): ESQLQuery {
     return new GrokCommand(this, renderExpressionArg(input), pattern)
   }
+
+  rename(mappings: Record<string, string>): ESQLQuery {
+    return new RenameCommand(this, mappings)
+  }
+
+  mvExpand(field: string): ESQLQuery {
+    return new MvExpandCommand(this, field)
+  }
 }
 
 class WhereCommand extends ESQLQuery {
@@ -243,6 +251,37 @@ class GrokCommand extends ESQLQuery {
 
   protected _renderInternal(): string {
     return `GROK ${this._input} ${escapeValue(this._pattern)}`
+  }
+}
+
+class RenameCommand extends ESQLQuery {
+  private readonly _mappings: Record<string, string>
+
+  constructor(parent: ESQLBase, mappings: Record<string, string>) {
+    super()
+    this.setParent(parent)
+    this._mappings = mappings
+  }
+
+  protected _renderInternal(): string {
+    const pairs = Object.entries(this._mappings)
+      .map(([old, renamed]) => `${formatIdentifier(old)} AS ${formatIdentifier(renamed)}`)
+      .join(', ')
+    return `RENAME ${pairs}`
+  }
+}
+
+class MvExpandCommand extends ESQLQuery {
+  private readonly _field: string
+
+  constructor(parent: ESQLBase, field: string) {
+    super()
+    this.setParent(parent)
+    this._field = field
+  }
+
+  protected _renderInternal(): string {
+    return `MV_EXPAND ${formatIdentifier(this._field)}`
   }
 }
 
