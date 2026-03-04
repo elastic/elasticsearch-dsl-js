@@ -99,6 +99,26 @@ export abstract class ESQLQuery extends ESQLBase {
   fuse(strategy: string, options?: { weights?: number[] }): ESQLQuery {
     return new FuseCommand(this, strategy, options?.weights)
   }
+
+  inlineStats(aggregations: Record<string, ExpressionArg>): InlineStatsQuery {
+    return new InlineStatsCommandInternal(this, renderNamedExpressions(aggregations))
+  }
+
+  changePoint(field: string): ChangePointCommand {
+    return new ChangePointCommand(this, field)
+  }
+
+  sample(probability: number): ESQLQuery {
+    return new SampleCommand(this, probability)
+  }
+
+  completion(prompt: string | Record<string, string>): CompletionCommand {
+    return new CompletionCommand(this, prompt)
+  }
+
+  rerank(query: string): RerankCommand {
+    return new RerankCommand(this, query)
+  }
 }
 
 class WhereCommand extends ESQLQuery {
@@ -363,6 +383,146 @@ class FuseCommand extends ESQLQuery {
   }
 }
 
+class InlineStatsCommandInternal extends ESQLQuery {
+  private readonly _aggs: string
+  private _byClause: string | null = null
+
+  constructor(parent: ESQLBase, aggs: string) {
+    super()
+    this.setParent(parent)
+    this._aggs = aggs
+  }
+
+  by(...grouping: ExpressionArg[]): ESQLQuery {
+    const parent = this._parent
+    if (!parent) {
+      throw new Error('InlineStatsCommand must have a parent')
+    }
+    const result = new InlineStatsCommandInternal(parent, this._aggs)
+    result._byClause = grouping.map(renderExpressionArg).join(', ')
+    return result
+  }
+
+  protected _renderInternal(): string {
+    const byStr = this._byClause ? ` BY ${this._byClause}` : ''
+    return `INLINESTATS ${this._aggs}${byStr}`
+  }
+}
+
+class ChangePointCommand extends ESQLQuery {
+  private readonly _field: string
+  private _onKey: string | null = null
+
+  constructor(parent: ESQLBase, field: string) {
+    super()
+    this.setParent(parent)
+    this._field = field
+  }
+
+  on(key: string): ChangePointCommand {
+    const result = new ChangePointCommand(this._parent as ESQLBase, this._field)
+    result._onKey = key
+    return result
+  }
+
+  protected _renderInternal(): string {
+    let cmd = `CHANGE_POINT ${formatIdentifier(this._field)}`
+    if (this._onKey) {
+      cmd += ` ON ${formatIdentifier(this._onKey)}`
+    }
+    return cmd
+  }
+}
+
+class SampleCommand extends ESQLQuery {
+  private readonly _probability: number
+
+  constructor(parent: ESQLBase, probability: number) {
+    super()
+    this.setParent(parent)
+    this._probability = probability
+  }
+
+  protected _renderInternal(): string {
+    return `SAMPLE ${this._probability}`
+  }
+}
+
+class CompletionCommand extends ESQLQuery {
+  private readonly _prompt: string | Record<string, string>
+  private _options: Record<string, unknown> | null = null
+
+  constructor(parent: ESQLBase, prompt: string | Record<string, string>) {
+    super()
+    this.setParent(parent)
+    this._prompt = prompt
+  }
+
+  with(options: Record<string, unknown>): CompletionCommand {
+    const result = new CompletionCommand(this._parent as ESQLBase, this._prompt)
+    result._options = options
+    return result
+  }
+
+  protected _renderInternal(): string {
+    let promptStr: string
+    if (typeof this._prompt === 'string') {
+      promptStr = escapeValue(this._prompt)
+    } else {
+      const entries = Object.entries(this._prompt)
+      promptStr = entries.map(([k, v]) => `${formatIdentifier(k)} = ${escapeValue(v)}`).join(', ')
+    }
+    let cmd = `COMPLETION ${promptStr}`
+    if (this._options) {
+      const opts = Object.entries(this._options)
+        .map(([k, v]) => `${formatIdentifier(k)} = ${escapeValue(v)}`)
+        .join(', ')
+      cmd += ` WITH ${opts}`
+    }
+    return cmd
+  }
+}
+
+class RerankCommand extends ESQLQuery {
+  private readonly _query: string
+  private _onFields: string[] | null = null
+  private _options: Record<string, unknown> | null = null
+
+  constructor(parent: ESQLBase, query: string) {
+    super()
+    this.setParent(parent)
+    this._query = query
+  }
+
+  on(...fields: string[]): RerankCommand {
+    const result = new RerankCommand(this._parent as ESQLBase, this._query)
+    result._onFields = fields
+    result._options = this._options
+    return result
+  }
+
+  with(options: Record<string, unknown>): RerankCommand {
+    const result = new RerankCommand(this._parent as ESQLBase, this._query)
+    result._onFields = this._onFields
+    result._options = options
+    return result
+  }
+
+  protected _renderInternal(): string {
+    let cmd = `RERANK ${escapeValue(this._query)}`
+    if (this._onFields && this._onFields.length > 0) {
+      cmd += ` ON ${this._onFields.map((f) => formatIdentifier(f)).join(', ')}`
+    }
+    if (this._options) {
+      const opts = Object.entries(this._options)
+        .map(([k, v]) => `${formatIdentifier(k)} = ${escapeValue(v)}`)
+        .join(', ')
+      cmd += ` WITH ${opts}`
+    }
+    return cmd
+  }
+}
+
 class StatsCommandInternal extends ESQLQuery {
   private readonly _aggs: string
   private _byClause: string | null = null
@@ -390,3 +550,4 @@ class StatsCommandInternal extends ESQLQuery {
 }
 
 export type StatsQuery = StatsCommandInternal
+export type InlineStatsQuery = InlineStatsCommandInternal
