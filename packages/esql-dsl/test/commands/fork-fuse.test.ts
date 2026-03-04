@@ -33,9 +33,7 @@ describe('fork', () => {
       ESQL.branch().where('b > 2'),
       ESQL.branch().where('c > 3')
     )
-    expect(q.render()).toBe(
-      'FROM docs\n| FORK\n  (WHERE a > 1)\n  (WHERE b > 2)\n  (WHERE c > 3)'
-    )
+    expect(q.render()).toBe('FROM docs\n| FORK\n  (WHERE a > 1)\n  (WHERE b > 2)\n  (WHERE c > 3)')
   })
 
   it('branches can have different commands', () => {
