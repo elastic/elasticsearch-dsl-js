@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseExpression } from '@elastic/elasticsearch-query-builder'
+import { BaseExpression, escapeValue } from '@elastic/elasticsearch-query-builder'
 import { ESQLBase } from './base'
 import { formatIdentifier } from './identifier'
 import { renderWhereOptions, type WhereOptions } from './where-options'
@@ -66,6 +66,18 @@ export abstract class ESQLQuery extends ESQLBase {
 
   drop(...columns: string[]): ESQLQuery {
     return new DropCommand(this, columns)
+  }
+
+  enrich(policy: string): EnrichCommand {
+    return new EnrichCommand(this, policy)
+  }
+
+  dissect(input: ExpressionArg, pattern: string, appendSeparator?: string): ESQLQuery {
+    return new DissectCommand(this, renderExpressionArg(input), pattern, appendSeparator)
+  }
+
+  grok(input: ExpressionArg, pattern: string): ESQLQuery {
+    return new GrokCommand(this, renderExpressionArg(input), pattern)
   }
 }
 
@@ -156,6 +168,81 @@ class DropCommand extends ESQLQuery {
       .map((c) => formatIdentifier(c, { allowPatterns: true }))
       .join(', ')
     return `DROP ${formatted}`
+  }
+}
+
+class EnrichCommand extends ESQLQuery {
+  private readonly _policy: string
+  private _onField: string | null = null
+  private _withFields: string[] | null = null
+
+  constructor(parent: ESQLBase, policy: string) {
+    super()
+    this.setParent(parent)
+    this._policy = policy
+  }
+
+  on(field: string): EnrichCommand {
+    const result = new EnrichCommand(this._parent as ESQLBase, this._policy)
+    result._onField = field
+    result._withFields = this._withFields
+    return result
+  }
+
+  with(...fields: string[]): EnrichCommand {
+    const result = new EnrichCommand(this._parent as ESQLBase, this._policy)
+    result._onField = this._onField
+    result._withFields = fields
+    return result
+  }
+
+  protected _renderInternal(): string {
+    let cmd = `ENRICH ${this._policy}`
+    if (this._onField) {
+      cmd += ` ON ${formatIdentifier(this._onField)}`
+    }
+    if (this._withFields && this._withFields.length > 0) {
+      cmd += ` WITH ${this._withFields.map((f) => formatIdentifier(f)).join(', ')}`
+    }
+    return cmd
+  }
+}
+
+class DissectCommand extends ESQLQuery {
+  private readonly _input: string
+  private readonly _pattern: string
+  private readonly _appendSeparator: string | undefined
+
+  constructor(parent: ESQLBase, input: string, pattern: string, appendSeparator?: string) {
+    super()
+    this.setParent(parent)
+    this._input = input
+    this._pattern = pattern
+    this._appendSeparator = appendSeparator
+  }
+
+  protected _renderInternal(): string {
+    let cmd = `DISSECT ${this._input} ${escapeValue(this._pattern)}`
+    if (this._appendSeparator !== undefined) {
+      cmd += ` APPEND_SEPARATOR=${escapeValue(this._appendSeparator)}`
+    }
+    return cmd
+  }
+}
+
+class GrokCommand extends ESQLQuery {
+  private readonly _input: string
+  private readonly _pattern: string
+
+  constructor(parent: ESQLBase, input: string, pattern: string) {
+    super()
+    this.setParent(parent)
+    this._input = input
+    this._pattern = pattern
+  }
+
+  protected _renderInternal(): string {
+    return `GROK ${this._input} ${escapeValue(this._pattern)}`
   }
 }
 
