@@ -1,0 +1,10 @@
+project: 'JavaScript/TypeScript DSL'
+products:
+  - id: elasticsearch-client
+cross_links:
+  - docs-content
+  - elasticsearch
+toc:
+  - toc: reference
+subs:
+  es: "Elasticsearch"
