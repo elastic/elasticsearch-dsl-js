@@ -25,7 +25,14 @@ function renderNamedExpressions(columns: Record<string, ExpressionArg>): string 
     .join(', ')
 }
 
+/**
+ * Abstract base class for all chainable ES|QL query objects. Provides methods
+ * for every ES|QL processing command (WHERE, EVAL, STATS, SORT, etc.).
+ *
+ * All methods are immutable — they return new query objects rather than mutating.
+ */
 export abstract class ESQLQuery extends ESQLBase {
+  /** Adds a `WHERE` clause to filter rows. Accepts a string, expression, or POJO options. */
   where(expression: ExpressionArg): ESQLQuery
   where(options: WhereOptions): ESQLQuery
   where(expressionOrOptions: ExpressionArg | WhereOptions): ESQLQuery {
@@ -38,6 +45,7 @@ export abstract class ESQLQuery extends ESQLBase {
     return new WhereCommand(this, renderWhereOptions(expressionOrOptions as WhereOptions))
   }
 
+  /** Adds an `EVAL` command to compute new columns. */
   eval(columns: Record<string, ExpressionArg>): ESQLQuery
   eval(...expressions: string[]): ESQLQuery
   eval(columnsOrFirst: Record<string, ExpressionArg> | string, ...rest: string[]): ESQLQuery {
@@ -48,75 +56,144 @@ export abstract class ESQLQuery extends ESQLBase {
     return new EvalCommand(this, renderNamedExpressions(columnsOrFirst))
   }
 
+  /** Adds a `STATS` aggregation command. Chain `.by()` on the result to group. */
   stats(aggregations: Record<string, ExpressionArg>): StatsQuery {
+    if (!aggregations || Object.keys(aggregations).length === 0) {
+      throw new Error('stats() requires at least one aggregation')
+    }
     return new StatsCommandInternal(this, renderNamedExpressions(aggregations))
   }
 
+  /** Adds a `SORT` command to order results. */
   sort(...columns: ExpressionArg[]): ESQLQuery {
+    if (columns.length === 0) {
+      throw new Error('sort() requires at least one column')
+    }
     return new SortCommand(this, columns.map(renderExpressionArg))
   }
 
+  /** Adds a `LIMIT` command to cap the number of returned rows. */
   limit(n: number): ESQLQuery {
+    if (typeof n !== 'number' || !Number.isInteger(n) || n < 0) {
+      throw new Error('limit() requires a non-negative integer')
+    }
     return new LimitCommand(this, n)
   }
 
+  /** Adds a `KEEP` command to select which columns to retain. */
   keep(...columns: string[]): ESQLQuery {
+    if (columns.length === 0) {
+      throw new Error('keep() requires at least one column')
+    }
     return new KeepCommand(this, columns)
   }
 
+  /** Adds a `DROP` command to remove columns from results. */
   drop(...columns: string[]): ESQLQuery {
+    if (columns.length === 0) {
+      throw new Error('drop() requires at least one column')
+    }
     return new DropCommand(this, columns)
   }
 
+  /** Adds an `ENRICH` command. Chain `.on()` and `.with()` to configure. */
   enrich(policy: string): EnrichCommand {
+    if (!policy) {
+      throw new Error('enrich() requires a policy name')
+    }
     return new EnrichCommand(this, policy)
   }
 
+  /** Adds a `DISSECT` command to extract structured fields from a string using a pattern. */
   dissect(input: ExpressionArg, pattern: string, appendSeparator?: string): ESQLQuery {
+    if (!pattern) {
+      throw new Error('dissect() requires a non-empty pattern')
+    }
     return new DissectCommand(this, renderExpressionArg(input), pattern, appendSeparator)
   }
 
+  /** Adds a `GROK` command to extract structured fields from a string using a grok pattern. */
   grok(input: ExpressionArg, pattern: string): ESQLQuery {
+    if (!pattern) {
+      throw new Error('grok() requires a non-empty pattern')
+    }
     return new GrokCommand(this, renderExpressionArg(input), pattern)
   }
 
+  /** Adds a `RENAME` command to rename columns. Keys are old names, values are new names. */
   rename(mappings: Record<string, string>): ESQLQuery {
+    if (!mappings || Object.keys(mappings).length === 0) {
+      throw new Error('rename() requires at least one mapping')
+    }
     return new RenameCommand(this, mappings)
   }
 
+  /** Adds an `MV_EXPAND` command to expand a multivalued field into one row per value. */
   mvExpand(field: string): ESQLQuery {
+    if (!field) {
+      throw new Error('mvExpand() requires a field name')
+    }
     return new MvExpandCommand(this, field)
   }
 
+  /** Adds a `LOOKUP JOIN` command. Chain `.on()` to specify the join key. */
   lookupJoin(index: string): LookupJoinCommand {
+    if (!index) {
+      throw new Error('lookupJoin() requires an index name')
+    }
     return new LookupJoinCommand(this, index)
   }
 
+  /** Adds a `FORK` command to run multiple sub-queries in parallel. */
   fork(...branches: ESQLBase[]): ForkCommand {
+    if (branches.length === 0) {
+      throw new Error('fork() requires at least one branch')
+    }
     return new ForkCommand(this, branches)
   }
 
+  /** Adds a `FUSE` command to merge forked results using a strategy (e.g. `'RRF'`). */
   fuse(strategy: string, options?: { weights?: number[] }): ESQLQuery {
+    if (!strategy) {
+      throw new Error('fuse() requires a strategy')
+    }
     return new FuseCommand(this, strategy, options?.weights)
   }
 
+  /** Adds an `INLINESTATS` command. Chain `.by()` on the result to group. */
   inlineStats(aggregations: Record<string, ExpressionArg>): InlineStatsQuery {
+    if (!aggregations || Object.keys(aggregations).length === 0) {
+      throw new Error('inlineStats() requires at least one aggregation')
+    }
     return new InlineStatsCommandInternal(this, renderNamedExpressions(aggregations))
   }
 
+  /** Adds a `CHANGE_POINT` command. Chain `.on()` and `.as_()` to configure. */
   changePoint(field: string): ChangePointCommand {
+    if (!field) {
+      throw new Error('changePoint() requires a field name')
+    }
     return new ChangePointCommand(this, field)
   }
 
+  /** Adds a `SAMPLE` command to sample a fraction of rows. */
   sample(probability: number): ESQLQuery {
+    if (typeof probability !== 'number' || probability < 0 || probability > 1) {
+      throw new Error('sample() requires a probability between 0 and 1')
+    }
     return new SampleCommand(this, probability)
   }
 
+  /** Adds a `COMPLETION` command for LLM inference. Chain `.with()` to set options. */
   completion(prompt: string | Record<string, string>): CompletionCommand {
     return new CompletionCommand(this, prompt)
   }
 
+  /** Adds a `RERANK` command for semantic reranking. Chain `.on()` and `.with()`. */
   rerank(query: string): RerankCommand {
+    if (!query) {
+      throw new Error('rerank() requires a query string')
+    }
     return new RerankCommand(this, query)
   }
 }
@@ -222,14 +299,22 @@ class EnrichCommand extends ESQLQuery {
     this._policy = policy
   }
 
+  /** Specifies the field to match on for enrichment. */
   on(field: string): EnrichCommand {
+    if (!field) {
+      throw new Error('on() requires a field name')
+    }
     const result = new EnrichCommand(this._parent as ESQLBase, this._policy)
     result._onField = field
     result._withFields = this._withFields
     return result
   }
 
+  /** Specifies which enrichment fields to add. */
   with(...fields: string[]): EnrichCommand {
+    if (fields.length === 0) {
+      throw new Error('with() requires at least one field')
+    }
     const result = new EnrichCommand(this._parent as ESQLBase, this._policy)
     result._onField = this._onField
     result._withFields = fields
@@ -327,7 +412,11 @@ class LookupJoinCommand extends ESQLQuery {
     this._index = index
   }
 
+  /** Specifies the field to join on. */
   on(field: string): LookupJoinCommand {
+    if (!field) {
+      throw new Error('on() requires a field name')
+    }
     const result = new LookupJoinCommand(this._parent as ESQLBase, this._index)
     result._onField = field
     return result
@@ -393,10 +482,14 @@ class InlineStatsCommandInternal extends ESQLQuery {
     this._aggs = aggs
   }
 
+  /** Groups the inline stats aggregation by the given fields. */
   by(...grouping: ExpressionArg[]): ESQLQuery {
     const parent = this._parent
     if (!parent) {
       throw new Error('InlineStatsCommand must have a parent')
+    }
+    if (grouping.length === 0) {
+      throw new Error('by() requires at least one grouping field')
     }
     const result = new InlineStatsCommandInternal(parent, this._aggs)
     result._byClause = grouping.map(renderExpressionArg).join(', ')
@@ -420,14 +513,22 @@ class ChangePointCommand extends ESQLQuery {
     this._field = field
   }
 
+  /** Specifies the key field to partition change point detection by. */
   on(key: string): ChangePointCommand {
+    if (!key) {
+      throw new Error('on() requires a key field')
+    }
     const result = new ChangePointCommand(this._parent as ESQLBase, this._field)
     result._onKey = key
     result._asNames = this._asNames
     return result
   }
 
+  /** Names the output columns for the change point type and p-value. */
   as_(typeName: string, pvalueName: string): ChangePointCommand {
+    if (!typeName || !pvalueName) {
+      throw new Error('as_() requires both a type name and a p-value name')
+    }
     const result = new ChangePointCommand(this._parent as ESQLBase, this._field)
     result._onKey = this._onKey
     result._asNames = [typeName, pvalueName]
@@ -470,6 +571,7 @@ class CompletionCommand extends ESQLQuery {
     this._prompt = prompt
   }
 
+  /** Sets inference options such as `inferenceId`. */
   with(options: Record<string, unknown>): CompletionCommand {
     const result = new CompletionCommand(this._parent as ESQLBase, this._prompt)
     result._options = options
@@ -506,13 +608,18 @@ class RerankCommand extends ESQLQuery {
     this._query = query
   }
 
+  /** Specifies which fields to rerank on. */
   on(...fields: string[]): RerankCommand {
+    if (fields.length === 0) {
+      throw new Error('on() requires at least one field')
+    }
     const result = new RerankCommand(this._parent as ESQLBase, this._query)
     result._onFields = fields
     result._options = this._options
     return result
   }
 
+  /** Sets reranking options such as `inferenceId` and `topN`. */
   with(options: Record<string, unknown>): RerankCommand {
     const result = new RerankCommand(this._parent as ESQLBase, this._query)
     result._onFields = this._onFields
@@ -545,10 +652,14 @@ class StatsCommandInternal extends ESQLQuery {
     this._aggs = aggs
   }
 
+  /** Groups the stats aggregation by the given fields. */
   by(...grouping: ExpressionArg[]): ESQLQuery {
     const parent = this._parent
     if (!parent) {
       throw new Error('StatsCommand must have a parent')
+    }
+    if (grouping.length === 0) {
+      throw new Error('by() requires at least one grouping field')
     }
     const result = new StatsCommandInternal(parent, this._aggs)
     result._byClause = grouping.map(renderExpressionArg).join(', ')
