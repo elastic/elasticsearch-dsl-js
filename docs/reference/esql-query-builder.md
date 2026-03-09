@@ -374,7 +374,15 @@ const query = ESQL.from('employees')
   .where(f.length('first_name').lt(4))
 ```
 
-Arguments passed to functions are assumed to be field references (identifiers). When passing literal string values, they are treated as such in the appropriate argument positions based on the function's semantics.
+Function argument handling varies by function. Functions like `length()`, `abs()`, and `avg()` treat string arguments as **field references** (identifiers). Functions like `concat()`, `startsWith()`, and `replace()` treat string arguments as **literal values**. When you need to explicitly pass a field reference to a literal-mode function, wrap it with `E()`:
+
+```typescript
+// field reference via E(): STARTS_WITH(name, "A")
+f.startsWith(E('name'), 'A')
+
+// without E(), both are literals: STARTS_WITH("name", "A")
+f.startsWith('name', 'A')
+```
 
 ### Function categories
 
@@ -414,27 +422,27 @@ const query = ESQL.from('employees')
 #### String functions
 
 ```typescript
-f.concat('first_name', ' ', 'last_name')  // CONCAT(first_name, " ", last_name)
-f.length('name')                            // LENGTH(name)
+f.concat(E('first_name'), ' ', E('last_name'))  // CONCAT(first_name, " ", last_name)
+f.length('name')                                 // LENGTH(name)
 f.toUpper('name')                           // TO_UPPER(name)
 f.toLower('name')                           // TO_LOWER(name)
 f.substring('msg', 0, 100)                 // SUBSTRING(msg, 0, 100)
 f.trim('name')                              // TRIM(name)
 f.left('name', 5)                           // LEFT(name, 5)
 f.right('name', 3)                          // RIGHT(name, 3)
-f.replace('msg', 'old', 'new')             // REPLACE(msg, "old", "new")
+f.replace(E('msg'), 'old', 'new')          // REPLACE(msg, "old", "new")
 f.repeat('star', 5)                         // REPEAT(star, 5)
-f.startsWith('name', 'prefix')             // STARTS_WITH(name, "prefix")
-f.endsWith('name', 'suffix')               // ENDS_WITH(name, "suffix")
+f.startsWith(E('name'), 'prefix')          // STARTS_WITH(name, "prefix")
+f.endsWith(E('name'), 'suffix')            // ENDS_WITH(name, "suffix")
 f.contains('message', 'error')             // CONTAINS(message, "error")
-f.split('tags', ',')                        // SPLIT(tags, ",")
+f.split(E('tags'), ',')                     // SPLIT(tags, ",")
 f.reverse('name')                           // REVERSE(name)
-f.locate('msg', 'error')                   // LOCATE(msg, "error")
+f.locate(E('msg'), 'error')                // LOCATE(msg, "error")
 f.space(10)                                 // SPACE(10)
 f.byteLength('data')                        // BYTE_LENGTH(data)
 f.bitLength('data')                         // BIT_LENGTH(data)
-f.lpad('val', 10, '0')                     // LPAD(val, 10, "0")
-f.rpad('val', 10, ' ')                     // RPAD(val, 10, " ")
+f.lpad(E('val'), 10, '0')                  // LPAD(val, 10, "0")
+f.rpad(E('val'), 10, ' ')                  // RPAD(val, 10, " ")
 ```
 
 #### Date functions
@@ -444,7 +452,7 @@ f.now()                                    // NOW()
 f.dateDiff('day', 'hire_date', f.now())    // DATE_DIFF("day", hire_date, NOW())
 f.dateTrunc('date', '1 month')            // DATE_TRUNC(date, "1 month")
 f.dateExtract('year', 'hire_date')         // DATE_EXTRACT("year", hire_date)
-f.dateParse('date_str', 'yyyy-MM-dd')     // DATE_PARSE(date_str, "yyyy-MM-dd")
+f.dateParse('date_str', 'yyyy-MM-dd')     // DATE_PARSE("date_str", "yyyy-MM-dd")
 f.dateFormat('ts', 'yyyy-MM-dd')          // DATE_FORMAT(ts, "yyyy-MM-dd")
 ```
 
@@ -460,7 +468,7 @@ f.pow('base', 2)      // POW(base, 2)
 f.log('value')        // LOG(value)
 f.log10('value')      // LOG10(value)
 f.pi()                // PI()
-f.e_()                // E()
+f.e()                 // E()
 f.tau()               // TAU()
 f.clamp('val', 0, 100) // CLAMP(val, 0, 100)
 f.greatest('a', 'b')  // GREATEST(a, b)
@@ -509,7 +517,7 @@ f.mvSum('values')          // MV_SUM(values)
 f.mvMedian('values')       // MV_MEDIAN(values)
 f.mvFirst('values')        // MV_FIRST(values)
 f.mvLast('values')         // MV_LAST(values)
-f.mvConcat('tags', ', ')   // MV_CONCAT(tags, ", ")
+f.mvConcat(E('tags'), ', ')  // MV_CONCAT(tags, ", ")
 f.mvSort('values')         // MV_SORT(values)
 f.mvDedupe('values')       // MV_DEDUPE(values)
 f.mvSlice('values', 0, 5)  // MV_SLICE(values, 0, 5)
@@ -540,16 +548,15 @@ f.toBoolean('val')    // TO_BOOLEAN(val)
 f.toInteger('val')    // TO_INTEGER(val)
 f.toLong('val')       // TO_LONG(val)
 f.toDouble('val')     // TO_DOUBLE(val)
-f.toString('val')     // TO_STRING(val)
+f.toString_('val')    // TO_STRING(val)
 f.toDatetime('val')   // TO_DATETIME(val)
 f.toIp('val')         // TO_IP(val)
 f.toVersion('val')    // TO_VERSION(val)
-f.toGeopoint('val')   // TO_GEOPOINT(val)
-f.toGeoshape('val')   // TO_GEOSHAPE(val)
+f.toGeoPoint('val')        // TO_GEOPOINT(val)
+f.toGeoShape('val')        // TO_GEOSHAPE(val)
 f.toCartesianPoint('val')  // TO_CARTESIANPOINT(val)
 f.toCartesianShape('val')  // TO_CARTESIANSHAPE(val)
 f.toUnsignedLong('val')    // TO_UNSIGNED_LONG(val)
-f.toDateNanos('val')       // TO_DATE_NANOS(val)
 ```
 
 #### IP and network functions
@@ -557,7 +564,7 @@ f.toDateNanos('val')       // TO_DATE_NANOS(val)
 ```typescript
 f.cidrMatch('ip', '10.0.0.0/8', '172.16.0.0/12')  // CIDR_MATCH(ip, "10.0.0.0/8", "172.16.0.0/12")
 f.ipPrefix('ip', 24, 0)                             // IP_PREFIX(ip, 24, 0)
-f.networkDirection('src', 'dst', '10.0.0.0/8')      // NETWORK_DIRECTION(src, dst, "10.0.0.0/8")
+f.networkDirection('src', 'dst')                     // NETWORK_DIRECTION(src, dst)
 ```
 
 #### Grouping functions

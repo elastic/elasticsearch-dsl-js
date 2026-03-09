@@ -113,3 +113,19 @@ export function chunk(str: ExpressionLike, ...rest: ExpressionLike[]): Instrumen
 export function contains(str: ExpressionLike, substr: ExpressionLike): InstrumentedExpression {
   return new InstrumentedExpression(`CONTAINS(${renderArg(str)}, ${renderLiteralArg(substr)})`)
 }
+
+export function lpad(
+  str: ExpressionLike,
+  len: ExpressionLike,
+  fill: ExpressionLike
+): InstrumentedExpression {
+  return fnLiteral('LPAD', str, len, fill)
+}
+
+export function rpad(
+  str: ExpressionLike,
+  len: ExpressionLike,
+  fill: ExpressionLike
+): InstrumentedExpression {
+  return fnLiteral('RPAD', str, len, fill)
+}
