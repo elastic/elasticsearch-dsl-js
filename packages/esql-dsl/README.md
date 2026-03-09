@@ -275,14 +275,14 @@ const query = ESQL.from('employees')
   .where(f.length('first_name').lt(4))
 ```
 
-String arguments to functions are treated as **field references** (identifiers). When passing literal string values, use the `E()` wrapper or pass them in positions where the function expects literals:
+Function argument handling varies by function. Functions like `length()`, `abs()`, and `avg()` treat string arguments as **field references** (identifiers). Functions like `concat()`, `startsWith()`, and `replace()` treat string arguments as **literal values**. When you need to pass a field reference to a literal-mode function, wrap it with `E()`:
 
 ```typescript
 // Field reference: LENGTH(first_name)
 f.length('first_name')
 
-// Literal string in CONCAT: CONCAT(first_name, " ", last_name)
-f.concat('first_name', ' ', 'last_name')
+// Field references in CONCAT need E(): CONCAT(first_name, " ", last_name)
+f.concat(E('first_name'), ' ', E('last_name'))
 ```
 
 ### Aggregation functions
@@ -333,9 +333,9 @@ The `f` namespace includes 150+ function wrappers covering every ES|QL function.
 
 ```typescript
 // String
-f.concat('first_name', ' ', 'last_name')  // CONCAT(first_name, " ", last_name)
-f.toUpper('name')                          // TO_UPPER(name)
-f.substring('msg', 0, 100)                // SUBSTRING(msg, 0, 100)
+f.concat(E('first_name'), ' ', E('last_name'))  // CONCAT(first_name, " ", last_name)
+f.toUpper('name')                                // TO_UPPER(name)
+f.substring('msg', 0, 100)                      // SUBSTRING(msg, 0, 100)
 
 // Math
 f.round('salary', -3)    // ROUND(salary, -3)
