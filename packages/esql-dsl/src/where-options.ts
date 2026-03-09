@@ -13,6 +13,17 @@ import {
 type WhereValue = unknown
 type FieldCondition = Record<symbol, WhereValue>
 
+/**
+ * Plain object syntax for `where()` conditions using `Op` symbols.
+ *
+ * @example
+ * ```ts
+ * query.where({
+ *   salary: { [Op.gt]: 50000 },
+ *   department: 'Engineering',
+ * })
+ * ```
+ */
 export type WhereOptions = Record<string | symbol, WhereValue>
 
 const OP_SQL_MAP: Record<symbol, string> = {
@@ -61,6 +72,7 @@ function renderFieldCondition(field: string, condition: FieldCondition): string 
   return parts.join(' AND ')
 }
 
+/** Converts a {@link WhereOptions} object into an ES|QL WHERE clause string. */
 export function renderWhereOptions(options: WhereOptions): string {
   const parts: string[] = []
 

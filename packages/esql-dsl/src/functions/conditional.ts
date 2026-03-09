@@ -31,22 +31,27 @@ class CaseBuilder {
   }
 }
 
+/** ES|QL `CASE` — conditional expression builder (WHEN/THEN/ELSE). */
 export function case_(): CaseBuilder {
   return new CaseBuilder()
 }
 
+/** ES|QL `COALESCE` — returns first non-null value. */
 export function coalesce(...values: ExpressionLike[]): InstrumentedExpression {
   return fn('COALESCE', ...values)
 }
 
+/** ES|QL `GREATEST` — returns the largest of the values. */
 export function greatest(...values: ExpressionLike[]): InstrumentedExpression {
   return fn('GREATEST', ...values)
 }
 
+/** ES|QL `LEAST` — returns the smallest of the values. */
 export function least(...values: ExpressionLike[]): InstrumentedExpression {
   return fn('LEAST', ...values)
 }
 
+/** ES|QL `NULLIF` — returns null if a equals b, else a. */
 export function nullif(a: ExpressionLike, b: ExpressionLike): InstrumentedExpression {
   return fn('NULLIF', a, b)
 }
