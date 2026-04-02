@@ -76,3 +76,6 @@ lib
 # OS
 .DS_Store
 Thumbs.db
+
+# Docs builder
+docs/.artifacts
