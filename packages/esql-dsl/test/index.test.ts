@@ -27,7 +27,7 @@ import {
 
 describe('esql-dsl exports', () => {
   it('exports VERSION', () => {
-    expect(VERSION).toBe('0.0.1')
+    expect(VERSION).toBe('1.0.0')
   })
 
   it('exports Op symbols', () => {
