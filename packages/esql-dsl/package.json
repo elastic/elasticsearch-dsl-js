@@ -1,6 +1,6 @@
 {
   "name": "@elastic/elasticsearch-esql-dsl",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Elasticsearch ES|QL DSL for JavaScript/TypeScript",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

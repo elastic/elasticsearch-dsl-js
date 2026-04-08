@@ -4,7 +4,7 @@
  */
 
 /** Package version. */
-export const VERSION = '0.0.1'
+export const VERSION = '1.0.0'
 
 export { Op, type OpType } from '@elastic/elasticsearch-query-builder'
 export { ESQLBase } from './base'

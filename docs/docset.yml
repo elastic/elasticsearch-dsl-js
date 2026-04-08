@@ -6,5 +6,6 @@ cross_links:
   - elasticsearch
 toc:
   - toc: reference
+  - toc: release-notes
 subs:
   es: "Elasticsearch"
