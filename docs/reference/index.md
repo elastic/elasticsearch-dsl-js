@@ -35,6 +35,7 @@ const query = ESQL.from('employees')
 const response = await client.esql.query({ query: query.render() })
 ```
 
+
 ## Guides
 
 - [ES|QL query builder](esql-query-builder.md) — Build ES|QL queries using JavaScript/TypeScript syntax
