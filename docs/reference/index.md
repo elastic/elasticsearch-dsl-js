@@ -20,6 +20,7 @@ npm install @elastic/elasticsearch-esql-dsl
 
 Then build and execute queries:
 
+
 ```typescript
 import { Client } from '@elastic/elasticsearch'
 import { ESQL, E } from '@elastic/elasticsearch-esql-dsl'
