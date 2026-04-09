@@ -20,6 +20,7 @@ npm install @elastic/elasticsearch-esql-dsl
 
 Then build and execute queries:
 
+
 ```typescript
 import { Client } from '@elastic/elasticsearch'
 import { ESQL, E } from '@elastic/elasticsearch-esql-dsl'
@@ -33,6 +34,7 @@ const query = ESQL.from('employees')
 
 const response = await client.esql.query({ query: query.render() })
 ```
+
 
 ## Guides
 
