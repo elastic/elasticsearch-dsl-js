@@ -66,3 +66,38 @@ jobs:
         if: ${{ github.event.inputs.package == 'search-dsl' || github.event.inputs.package == 'all' }}
         run: pnpm publish --access public --no-git-checks --tag ${{ github.event.inputs.tag }} --provenance
         working-directory: packages/search-dsl
+
+      - name: Create GitHub Release
+        if: ${{ github.event.inputs.tag == 'latest' }}
+        run: |
+          get_version() { node -p "require('./packages/$1/package.json').version"; }
+          case "${{ github.event.inputs.package }}" in
+            query-builder)
+              gh release create "query-builder-v$(get_version query-builder)" \
+                --title "query-builder v$(get_version query-builder)" \
+                --generate-notes --target "${{ github.event.inputs.branch }}"
+              ;;
+            esql-dsl)
+              gh release create "esql-dsl-v$(get_version esql-dsl)" \
+                --title "esql-dsl v$(get_version esql-dsl)" \
+                --generate-notes --target "${{ github.event.inputs.branch }}"
+              ;;
+            search-dsl)
+              gh release create "search-dsl-v$(get_version search-dsl)" \
+                --title "search-dsl v$(get_version search-dsl)" \
+                --generate-notes --target "${{ github.event.inputs.branch }}"
+              ;;
+            all)
+              gh release create "esql-dsl-v$(get_version esql-dsl)" \
+                --title "esql-dsl v$(get_version esql-dsl)" \
+                --generate-notes --target "${{ github.event.inputs.branch }}"
+              gh release create "query-builder-v$(get_version query-builder)" \
+                --title "query-builder v$(get_version query-builder)" \
+                --generate-notes --target "${{ github.event.inputs.branch }}"
+              gh release create "search-dsl-v$(get_version search-dsl)" \
+                --title "search-dsl v$(get_version search-dsl)" \
+                --generate-notes --target "${{ github.event.inputs.branch }}"
+              ;;
+          esac
+        env:
+          GH_TOKEN: ${{ github.token }}
