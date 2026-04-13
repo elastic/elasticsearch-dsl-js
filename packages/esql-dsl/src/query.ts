@@ -136,7 +136,10 @@ export abstract class ESQLQuery extends ESQLBase {
     return new MvExpandCommand(this, field)
   }
 
-  /** Adds a `LOOKUP JOIN` command. Chain `.on()` to specify the join key. */
+  /**
+   * Adds a `LOOKUP JOIN` command. Chain `.on()` to specify the join key.
+   * @since Elasticsearch 8.18
+   */
   lookupJoin(index: string): LookupJoinCommand {
     if (!index) {
       throw new Error('lookupJoin() requires an index name')
@@ -144,7 +147,10 @@ export abstract class ESQLQuery extends ESQLBase {
     return new LookupJoinCommand(this, index)
   }
 
-  /** Adds a `FORK` command to run multiple sub-queries in parallel. */
+  /**
+   * Adds a `FORK` command to run multiple sub-queries in parallel.
+   * @since Elasticsearch 9.0
+   */
   fork(...branches: ESQLBase[]): ForkCommand {
     if (branches.length === 0) {
       throw new Error('fork() requires at least one branch')
@@ -152,7 +158,10 @@ export abstract class ESQLQuery extends ESQLBase {
     return new ForkCommand(this, branches)
   }
 
-  /** Adds a `FUSE` command to merge forked results using a strategy (e.g. `'RRF'`). */
+  /**
+   * Adds a `FUSE` command to merge forked results using a strategy (e.g. `'RRF'`).
+   * @since Elasticsearch 9.1
+   */
   fuse(strategy: string, options?: { weights?: number[] }): ESQLQuery {
     if (!strategy) {
       throw new Error('fuse() requires a strategy')
@@ -160,7 +169,10 @@ export abstract class ESQLQuery extends ESQLBase {
     return new FuseCommand(this, strategy, options?.weights)
   }
 
-  /** Adds an `INLINESTATS` command. Chain `.by()` on the result to group. */
+  /**
+   * Adds an `INLINESTATS` command. Chain `.by()` on the result to group.
+   * @since Elasticsearch 8.16
+   */
   inlineStats(aggregations: Record<string, ExpressionArg>): InlineStatsQuery {
     if (!aggregations || Object.keys(aggregations).length === 0) {
       throw new Error('inlineStats() requires at least one aggregation')
@@ -168,7 +180,10 @@ export abstract class ESQLQuery extends ESQLBase {
     return new InlineStatsCommandInternal(this, renderNamedExpressions(aggregations))
   }
 
-  /** Adds a `CHANGE_POINT` command. Chain `.on()` and `.as_()` to configure. */
+  /**
+   * Adds a `CHANGE_POINT` command. Chain `.on()` and `.as_()` to configure.
+   * @since Elasticsearch 8.18
+   */
   changePoint(field: string): ChangePointCommand {
     if (!field) {
       throw new Error('changePoint() requires a field name')
@@ -176,7 +191,10 @@ export abstract class ESQLQuery extends ESQLBase {
     return new ChangePointCommand(this, field)
   }
 
-  /** Adds a `SAMPLE` command to sample a fraction of rows. */
+  /**
+   * Adds a `SAMPLE` command to sample a fraction of rows.
+   * @since Elasticsearch 9.1
+   */
   sample(probability: number): ESQLQuery {
     if (typeof probability !== 'number' || probability < 0 || probability > 1) {
       throw new Error('sample() requires a probability between 0 and 1')
@@ -184,12 +202,18 @@ export abstract class ESQLQuery extends ESQLBase {
     return new SampleCommand(this, probability)
   }
 
-  /** Adds a `COMPLETION` command for LLM inference. Chain `.with()` to set options. */
+  /**
+   * Adds a `COMPLETION` command for LLM inference. Chain `.with()` to set options.
+   * @since Elasticsearch 9.1
+   */
   completion(prompt: string | Record<string, string>): CompletionCommand {
     return new CompletionCommand(this, prompt)
   }
 
-  /** Adds a `RERANK` command for semantic reranking. Chain `.on()` and `.with()`. */
+  /**
+   * Adds a `RERANK` command for semantic reranking. Chain `.on()` and `.with()`.
+   * @since Elasticsearch 9.1
+   */
   rerank(query: string): RerankCommand {
     if (!query) {
       throw new Error('rerank() requires a query string')

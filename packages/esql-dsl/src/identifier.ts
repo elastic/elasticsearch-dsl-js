@@ -19,3 +19,18 @@ export function formatIdentifier(name: string, opts?: { allowPatterns?: boolean 
   }
   return escapeIdentifier(name)
 }
+
+/** ES|QL source (index) names allow hyphens, dots, digits, and wildcards in addition to identifier chars. */
+const SOURCE_NAME_REGEX = /^[a-zA-Z_@*][a-zA-Z0-9_.*<>:, /-]*$/
+
+/**
+ * Formats an index/source name for ES|QL FROM/TS commands.
+ * Index names have more relaxed rules than field identifiers — hyphens,
+ * dots, wildcards, and date math expressions are all valid unquoted.
+ */
+export function formatSourceName(name: string): string {
+  if (SOURCE_NAME_REGEX.test(name)) {
+    return name
+  }
+  return escapeIdentifier(name)
+}
