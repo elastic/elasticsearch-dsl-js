@@ -20,6 +20,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 1.0.0 [elasticsearch-dsl-js-1.0.0-release-notes]
 
+test
 ### Features and enhancements [elasticsearch-dsl-js-1.0.0-features-enhancements]
 
 - **Fluent, chainable ES|QL query building:** Construct queries using source commands (`FROM`, `ROW`, `SHOW`, `TS`) and processing commands (`WHERE`, `EVAL`, `STATS`, `SORT`, `LIMIT`, `KEEP`, `DROP`, `RENAME`, `ENRICH`, `DISSECT`, `GROK`, `MV_EXPAND`, `LOOKUP JOIN`, `FORK`, `SAMPLE`, `COMPLETION`, `RERANK`, and more) with a natural method-chaining API.
