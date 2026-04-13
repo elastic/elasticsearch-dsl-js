@@ -12,7 +12,7 @@ importers:
         specifier: 2.4.10
         version: 2.4.10
       '@elastic/elasticsearch':
-        specifier: ^9.3.4
+        specifier: 9.3.4
         version: 9.3.4
       '@types/node':
         specifier: 24.12.0
