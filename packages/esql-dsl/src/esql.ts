@@ -4,7 +4,7 @@
  */
 
 import { BaseExpression, escapeValue } from '@elastic/elasticsearch-query-builder'
-import { formatIdentifier } from './identifier'
+import { formatIdentifier, formatSourceName } from './identifier'
 import { ESQLQuery } from './query'
 
 function renderRowValue(value: unknown): string {
@@ -29,9 +29,7 @@ export class FromCommand extends ESQLQuery {
   }
 
   protected _renderInternal(): string {
-    const formatted = this._indices
-      .map((i) => formatIdentifier(i, { allowPatterns: true }))
-      .join(', ')
+    const formatted = this._indices.map(formatSourceName).join(', ')
     let cmd = `FROM ${formatted}`
     if (this._metadata && this._metadata.length > 0) {
       cmd += ` METADATA ${this._metadata.map((f) => formatIdentifier(f)).join(', ')}`
@@ -70,12 +68,12 @@ export class RowCommand extends ESQLQuery {
 
 /** Represents a `SHOW` source command. */
 export class ShowCommand extends ESQLQuery {
-  private readonly _item: 'INFO' | 'FUNCTIONS'
+  private readonly _item: 'INFO'
 
-  constructor(item: 'INFO' | 'FUNCTIONS') {
+  constructor(item: 'INFO') {
     super()
-    if (item !== 'INFO' && item !== 'FUNCTIONS') {
-      throw new Error("ESQL.show() requires 'INFO' or 'FUNCTIONS'")
+    if (item !== 'INFO') {
+      throw new Error("ESQL.show() requires 'INFO'")
     }
     this._item = item
   }
@@ -85,7 +83,10 @@ export class ShowCommand extends ESQLQuery {
   }
 }
 
-/** Represents a `TS` source command for time-series indices. Supports `.metadata()`. */
+/**
+ * Represents a `TS` source command for time-series indices. Supports `.metadata()`.
+ * @since Elasticsearch 8.15
+ */
 export class TsCommand extends ESQLQuery {
   private readonly _indices: string[]
   private readonly _metadata: string[] | null
@@ -100,9 +101,7 @@ export class TsCommand extends ESQLQuery {
   }
 
   protected _renderInternal(): string {
-    const formatted = this._indices
-      .map((i) => formatIdentifier(i, { allowPatterns: true }))
-      .join(', ')
+    const formatted = this._indices.map(formatSourceName).join(', ')
     let cmd = `TS ${formatted}`
     if (this._metadata && this._metadata.length > 0) {
       cmd += ` METADATA ${this._metadata.map((f) => formatIdentifier(f)).join(', ')}`
@@ -145,12 +144,15 @@ export const ESQL = {
     return new RowCommand(values)
   },
 
-  /** Creates a `SHOW` command. Accepts `'INFO'` or `'FUNCTIONS'`. */
-  show(item: 'INFO' | 'FUNCTIONS'): ShowCommand {
+  /** Creates a `SHOW` command. Accepts `'INFO'`. */
+  show(item: 'INFO'): ShowCommand {
     return new ShowCommand(item)
   },
 
-  /** Creates a `TS` command for querying time-series indices. */
+  /**
+   * Creates a `TS` command for querying time-series indices.
+   * @since Elasticsearch 8.15
+   */
   ts(...indices: string[]): TsCommand {
     return new TsCommand(indices)
   },

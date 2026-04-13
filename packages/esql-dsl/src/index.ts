@@ -4,7 +4,7 @@
  */
 
 /** Package version. */
-export const VERSION = '1.0.0'
+export const VERSION = '1.0.1'
 
 export { Op, type OpType } from '@elastic/elasticsearch-query-builder'
 export { ESQLBase } from './base'
@@ -13,7 +13,7 @@ export { BranchCommand, ESQL, FromCommand, RowCommand, ShowCommand, TsCommand } 
 export { AggregationExpression, E, InstrumentedExpression } from './expression'
 /** All ES|QL functions, available as `f.functionName()`. */
 export * as f from './functions'
-export { formatIdentifier } from './identifier'
+export { formatIdentifier, formatSourceName } from './identifier'
 export { and_, not_, or_ } from './logical'
 export { ESQLQuery, type InlineStatsQuery, type StatsQuery, type WhereOptions } from './query'
 export { esql } from './template'

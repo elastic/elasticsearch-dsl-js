@@ -20,6 +20,10 @@ describe('ESQL.from()', () => {
     expect(ESQL.from('logs-*').toString()).toBe('FROM logs-*')
   })
 
+  it('hyphenated index names are not backtick-escaped', () => {
+    expect(ESQL.from('dsl-integration-test').toString()).toBe('FROM dsl-integration-test')
+  })
+
   it('metadata() renders inline with FROM', () => {
     expect(ESQL.from('x').metadata('_id', '_score').toString()).toBe('FROM x METADATA _id, _score')
   })
@@ -58,8 +62,9 @@ describe('ESQL.show()', () => {
     expect(ESQL.show('INFO').toString()).toBe('SHOW INFO')
   })
 
-  it('SHOW FUNCTIONS', () => {
-    expect(ESQL.show('FUNCTIONS').toString()).toBe('SHOW FUNCTIONS')
+  it('rejects invalid arguments', () => {
+    // @ts-expect-error -- testing runtime validation
+    expect(() => ESQL.show('INVALID')).toThrow()
   })
 })
 
