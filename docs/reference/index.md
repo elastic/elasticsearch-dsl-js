@@ -1,6 +1,6 @@
 # Elasticsearch DSL for JavaScript/TypeScript
 
-Fluent, type-safe DSL libraries for building Elasticsearch queries in JavaScript and TypeScript.
+Fluent, type-safe DSL libraries for building Elasticsearch queries in JavaScript and TypeScript. These packages provide a chainable API with automatic value escaping, full IDE support, and injection prevention.
 
 ## Packages
 
