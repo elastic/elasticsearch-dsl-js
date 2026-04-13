@@ -11,6 +11,6 @@ permissions:
   actions: read
 jobs:
   deploy:
-    uses: elastic/docs-actions/.github/workflows/docs-deploy.yml@v1
+    uses: elastic/docs-actions/.github/workflows/docs-deploy.yml@7227c43102bffcbd7303564886a58e7b6f46cfc5 # v1
     with:
       enable-vale-linting: true
