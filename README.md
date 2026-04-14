@@ -3,30 +3,60 @@
 [![CI](https://github.com/elastic/elasticsearch-dsl-js/actions/workflows/ci.yml/badge.svg)](https://github.com/elastic/elasticsearch-dsl-js/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A collection of fluent, type-safe DSL libraries for Elasticsearch in JavaScript and TypeScript.
+Fluent, type-safe DSL libraries for building Elasticsearch queries in JavaScript and TypeScript. Build queries using method chaining with automatic value escaping, full IDE support, and injection prevention.
 
 ## Packages
 
 | Package | Description | npm |
 |---------|-------------|-----|
-| [@elastic/elasticsearch-query-builder](./packages/query-builder) | Query builder for Elasticsearch | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-query-builder)](https://www.npmjs.com/package/@elastic/elasticsearch-query-builder) |
-| [@elastic/elasticsearch-esql-dsl](./packages/esql-dsl) | ES\|QL DSL for Elasticsearch | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-esql-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-esql-dsl) |
-| [@elastic/elasticsearch-search-dsl](./packages/search-dsl) | Search DSL for Elasticsearch | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-search-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-search-dsl) |
+| [@elastic/elasticsearch-esql-dsl](./packages/esql-dsl) | Build [ES\|QL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql) queries with a chainable API. Supports all source commands, processing commands, 150+ functions, and expression building. | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-esql-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-esql-dsl) |
+| [@elastic/elasticsearch-query-builder](./packages/query-builder) | Shared utilities: operator symbols (`Op`), value/identifier escaping, and the base expression type used across packages. | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-query-builder)](https://www.npmjs.com/package/@elastic/elasticsearch-query-builder) |
+| [@elastic/elasticsearch-search-dsl](./packages/search-dsl) | Search DSL for Elasticsearch (coming soon). | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-search-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-search-dsl) |
 
-## Installation
+## Quick start
 
-Install individual packages as needed:
+### ES|QL query builder
+
+Install the package:
 
 ```bash
-# Query Builder
-npm install @elastic/elasticsearch-query-builder
-
-# ES|QL DSL
 npm install @elastic/elasticsearch-esql-dsl
-
-# Search DSL
-npm install @elastic/elasticsearch-search-dsl
 ```
+
+Build and render a query:
+
+```typescript
+import { ESQL, E, f } from '@elastic/elasticsearch-esql-dsl'
+
+const query = ESQL.from('employees')
+  .where(E('still_hired').eq(true))
+  .eval({ annual_bonus: E('salary').mul(0.1) })
+  .stats({ avg_bonus: f.avg('annual_bonus') })
+  .by('department')
+  .sort('avg_bonus DESC')
+  .limit(10)
+
+console.log(query.render())
+// FROM employees
+// | WHERE still_hired == true
+// | EVAL annual_bonus = salary * 0.1
+// | STATS avg_bonus = AVG(annual_bonus) BY department
+// | SORT avg_bonus DESC
+// | LIMIT 10
+```
+
+Execute with the [Elasticsearch JavaScript client](https://github.com/elastic/elasticsearch-js):
+
+```typescript
+import { Client } from '@elastic/elasticsearch'
+
+const client = new Client({ node: 'http://localhost:9200' })
+const response = await client.esql.query({ query: query.render() })
+```
+
+All queries are **immutable** -- each method returns a new query object, so you can safely branch from a base query without side effects.
+
+For full documentation, see the [ES|QL DSL README](./packages/esql-dsl/README.md).
 
 ## Development
 

@@ -476,7 +476,7 @@ function findEmployeeByName(name: string) {
 |---------|-------------|
 | `ESQL.from(...indices)` | Select indices to query |
 | `ESQL.row(values)` | Produce a row with literal values |
-| `ESQL.show(item)` | Show deployment info (`'INFO'` or `'FUNCTIONS'`) |
+| `ESQL.show(item)` | Show deployment info (`'INFO'`) |
 | `ESQL.ts(...indices)` | Query time-series indices |
 | `ESQL.branch()` | Create a branch for use with `fork()` |
 
