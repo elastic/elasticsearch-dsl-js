@@ -11,7 +11,6 @@ Fluent, type-safe DSL libraries for building Elasticsearch queries in JavaScript
 |---------|-------------|-----|
 | [@elastic/elasticsearch-esql-dsl](./packages/esql-dsl) | Build [ES\|QL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql) queries with a chainable API. Supports all source commands, processing commands, 150+ functions, and expression building. | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-esql-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-esql-dsl) |
 | [@elastic/elasticsearch-query-builder](./packages/query-builder) | Shared utilities: operator symbols (`Op`), value/identifier escaping, and the base expression type used across packages. | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-query-builder)](https://www.npmjs.com/package/@elastic/elasticsearch-query-builder) |
-| [@elastic/elasticsearch-search-dsl](./packages/search-dsl) | Search DSL for Elasticsearch (coming soon). | [![npm](https://img.shields.io/npm/v/@elastic/elasticsearch-search-dsl)](https://www.npmjs.com/package/@elastic/elasticsearch-search-dsl) |
 
 ## Quick start
 
@@ -109,7 +108,7 @@ pnpm --filter @elastic/elasticsearch-query-builder build
 pnpm --filter @elastic/elasticsearch-esql-dsl test
 
 # Run tests in watch mode for a package
-pnpm --filter @elastic/elasticsearch-search-dsl test:watch
+pnpm --filter @elastic/elasticsearch-esql-dsl test:watch
 ```
 
 ## Node.js Version Support
