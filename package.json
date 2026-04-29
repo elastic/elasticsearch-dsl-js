@@ -33,7 +33,7 @@
     "prepare": "turbo run build"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.11",
+    "@biomejs/biome": "2.4.12",
     "@elastic/elasticsearch": "9.3.4",
     "@types/node": "24.12.2",
     "@vitest/coverage-v8": "4.1.4",
