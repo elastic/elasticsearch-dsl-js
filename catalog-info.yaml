@@ -4,8 +4,12 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: elasticsearch-dsl-js
-  description: Fluent, type-safe DSL libraries for building Elasticsearch queries in JavaScript and TypeScript
+  description: >
+    Fluent, type-safe DSL libraries for building Elasticsearch queries in
+    JavaScript and TypeScript.
+    DEPRECATED: this repository has moved to elastic/esql-js
+    (packages/esql-dsl and packages/query-builder).
 spec:
   type: library
   owner: group:devtools-team
-  lifecycle: production
+  lifecycle: deprecated

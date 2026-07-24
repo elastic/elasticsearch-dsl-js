@@ -2,7 +2,7 @@
   "name": "elasticsearch-dsl-js",
   "version": "0.0.0",
   "private": true,
-  "description": "Elasticsearch DSL libraries for JavaScript/TypeScript",
+  "description": "DEPRECATED: moved to the elastic/esql-js monorepo (packages/esql-dsl and packages/query-builder). Elasticsearch DSL libraries for JavaScript/TypeScript",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/elastic/elasticsearch-dsl-js.git"

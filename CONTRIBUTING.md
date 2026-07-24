@@ -1,5 +1,12 @@
 # Contributing to Elasticsearch DSL Libraries
 
+> [!IMPORTANT]
+> This repository has moved to the
+> [`elastic/esql-js`](https://github.com/elastic/esql-js) monorepo, under
+> [`packages/esql-dsl`](https://github.com/elastic/esql-js/tree/main/packages/esql-dsl) and
+> [`packages/query-builder`](https://github.com/elastic/esql-js/tree/main/packages/query-builder).
+> Please direct all contributions there; the guidance below no longer applies.
+
 Thank you for your interest in contributing!
 
 ## Development Setup

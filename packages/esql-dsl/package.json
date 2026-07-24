@@ -1,7 +1,7 @@
 {
   "name": "@elastic/elasticsearch-esql-dsl",
   "version": "1.0.1",
-  "description": "Elasticsearch ES|QL DSL for JavaScript/TypeScript",
+  "description": "DEPRECATED: moved to the elastic/esql-js monorepo (packages/esql-dsl). Elasticsearch ES|QL DSL for JavaScript/TypeScript",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

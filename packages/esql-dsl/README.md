@@ -1,5 +1,12 @@
 # @elastic/elasticsearch-esql-dsl
 
+> [!IMPORTANT]
+> This package has moved to the
+> [`elastic/esql-js`](https://github.com/elastic/esql-js) monorepo, under
+> [`packages/esql-dsl`](https://github.com/elastic/esql-js/tree/main/packages/esql-dsl).
+> Please open issues and pull requests there instead of here. This repository
+> is kept for historical reference only and is no longer maintained.
+
 > **Technical Preview:** This package is in technical preview and may be changed or removed in a future release.
 
 A fluent, type-safe ES|QL query builder for JavaScript and TypeScript. Build ES|QL queries using method chaining and render them to query strings for use with the Elasticsearch client.
