@@ -1,5 +1,12 @@
 # @elastic/elasticsearch-query-builder
 
+> [!IMPORTANT]
+> This package has moved to the
+> [`elastic/esql-js`](https://github.com/elastic/esql-js) monorepo, under
+> [`packages/query-builder`](https://github.com/elastic/esql-js/tree/main/packages/query-builder).
+> Please open issues and pull requests there instead of here. This repository
+> is kept for historical reference only and is no longer maintained.
+
 Shared utilities for building Elasticsearch queries in JavaScript/TypeScript: operator symbols, escaping helpers, and a base expression type for cross-package type checks.
 
 ## Installation

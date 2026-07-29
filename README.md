@@ -1,5 +1,15 @@
 # Elasticsearch DSL Libraries for JavaScript/TypeScript
 
+> [!IMPORTANT]
+> This repository has moved. Development now happens in the
+> [`elastic/esql-js`](https://github.com/elastic/esql-js) monorepo:
+> `@elastic/elasticsearch-esql-dsl` lives in
+> [`packages/esql-dsl`](https://github.com/elastic/esql-js/tree/main/packages/esql-dsl)
+> and `@elastic/elasticsearch-query-builder` in
+> [`packages/query-builder`](https://github.com/elastic/esql-js/tree/main/packages/query-builder).
+> Please open issues and pull requests there instead of here. This repository
+> is kept for historical reference only and is no longer maintained.
+
 [![CI](https://github.com/elastic/elasticsearch-dsl-js/actions/workflows/ci.yml/badge.svg)](https://github.com/elastic/elasticsearch-dsl-js/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
