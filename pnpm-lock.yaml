@@ -12,8 +12,8 @@ importers:
         specifier: 2.4.12
         version: 2.4.12
       '@elastic/elasticsearch':
-        specifier: 9.3.4
-        version: 9.3.4
+        specifier: 9.5.1
+        version: 9.5.1(apache-arrow@21.1.0)
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -147,16 +147,21 @@ packages:
     resolution: {integrity: sha512-aSoXhb4XWLr3szVQt4gJqp4j4jiXPQLWSnXvobetag+B1WYii4ckXIf7sLKaJoP+g+1gueRHyJ+MW/I2gcFQSA==}
     engines: {node: '>=18'}
 
-  '@elastic/elasticsearch@9.3.4':
-    resolution: {integrity: sha512-Mp14fPEYx+WTfZdcvAaZ9WkLYGHQCbwMx6EP5VCucYdhv4cn/g2sbnMT5HzK+gX3XEpBnnkEK/+WysCKzxuo3A==}
-    engines: {node: '>=18'}
+  '@elastic/elasticsearch@9.5.1':
+    resolution: {integrity: sha512-2ZZqCmgGPjSYn+OphFRYm9g46KVINA0i8fRmlPHJC60RvJeFB6NSHO0nKKOOYhm3WRXyGkLu1xkdXe724fnmnA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      apache-arrow: 18.x - 21.x
+    peerDependenciesMeta:
+      apache-arrow:
+        optional: true
 
   '@elastic/transport@9.3.2':
     resolution: {integrity: sha512-nmpn7Qe2cZN1ZZgiCuEDKjFT0fpXbK6QdudbyoFJpU0MElTWIrCn88NYCJ6H5BP0jQW/x961ZVkabsS8u22oyg==}
     engines: {node: '>=20'}
 
-  '@elastic/transport@9.3.5':
-    resolution: {integrity: sha512-hIMJbt1guqr3/N2zCN45k9hw9o78qcdsO0xietLe+Bfa+JL0YafHTgkWkM1oT3Ht5sGMJaDcJZiYomSMU6CtTA==}
+  '@elastic/transport@9.4.0':
+    resolution: {integrity: sha512-/lE1rEPoXWjbQD1pAFyI/zZuMU1XdsxYgfZIAbQGgDabhinKYpZbQh6Qc/dYS6tEPxHOqlJ/WSQvSHZap4+I+w==}
     engines: {node: '>=20'}
 
   '@esbuild/aix-ppc64@0.27.3':
@@ -1373,13 +1378,13 @@ snapshots:
       - '@75lb/nature'
       - supports-color
 
-  '@elastic/elasticsearch@9.3.4':
+  '@elastic/elasticsearch@9.5.1(apache-arrow@21.1.0)':
     dependencies:
-      '@elastic/transport': 9.3.5
-      apache-arrow: 21.1.0
+      '@elastic/transport': 9.4.0
       tslib: 2.8.1
+    optionalDependencies:
+      apache-arrow: 21.1.0
     transitivePeerDependencies:
-      - '@75lb/nature'
       - supports-color
 
   '@elastic/transport@9.3.2':
@@ -1395,7 +1400,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/transport@9.3.5':
+  '@elastic/transport@9.4.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
